@@ -34,6 +34,15 @@ CREATE TABLE sales (
       ON DELETE CASCADE
 );
 
+CREATE TABLE contactUs (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL,
+    `orderNumber` INT DEFAULT 0,
+    `phone` VARCHAR(255) DEFAULT NULL,
+    `subject` VARCHAR(255) NOT NULL,
+    `message` VARCHAR(300) 
+);
 
 
  
