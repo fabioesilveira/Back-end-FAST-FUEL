@@ -1,5 +1,6 @@
 const express = require("express");
 const connection = require("../connection");
+const { getProductIdController, getProductCategoryController } = require("../controllers/productsControllers.js");
 
 const router = express.Router();
 
@@ -8,31 +9,8 @@ router.get("/", async (req, res) => {
   return res.json(result);
 });
 
-router.get("/:id", async (req, res) => {
-  const { id } = req.params;
-  const [result] = await connection.execute(
-    `SELECT * FROM products where id = ?`, [id]
-  );
-
-  if (result.length === 0) {
-    return res.json({ msg: "cannot find" });
-  }
-
-  return res.json(result);
-});
-
-router.get("/category/:category", async (req, res) => {
-  const { category } = req.params;
-  const [result] = await connection.execute(
-    `SELECT * FROM products where category = ?`, [category]
-  );
-
-  if (result.length === 0) {
-    return res.json({ msg: "cannot find" });
-  }
-
-  return res.json(result);
-});
+router.get("/:id", getProductIdController);
+router.get("/category/:category",getProductCategoryController);
 
 router.post("/", async (req, res) => {
   const { name, price, category } = req.body;
