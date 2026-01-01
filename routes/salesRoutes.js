@@ -8,7 +8,6 @@ function genOrderCode() {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
-
 router.get("/", async (req, res) => {
   try {
     const { status, user_id, order_code } = req.query;
@@ -20,12 +19,10 @@ router.get("/", async (req, res) => {
       sql += " AND status = ?";
       params.push(status);
     }
-
     if (user_id) {
       sql += " AND user_id = ?";
       params.push(user_id);
     }
-
     if (order_code) {
       sql += " AND order_code = ?";
       params.push(order_code);
@@ -41,9 +38,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-/**
- * GET /sales/:id
- */
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -52,17 +46,13 @@ router.get("/:id", async (req, res) => {
       [id]
     );
 
-    if (result.length === 0) {
-      return res.status(404).json({ msg: "cannot find" });
-    }
-
+    if (result.length === 0) return res.status(404).json({ msg: "cannot find" });
     return res.json(result[0]);
   } catch (e) {
     console.error(e);
     return res.status(500).json({ msg: "Failed to load sale" });
   }
 });
-
 
 router.post("/", async (req, res) => {
   try {
@@ -76,13 +66,11 @@ router.post("/", async (req, res) => {
       total = 0,
     } = req.body;
 
-    if (!items) {
-      return res.status(400).json({ msg: "items is required" });
-    }
+    if (!items) return res.status(400).json({ msg: "items is required" });
 
-    // tenta gerar um order_code único (até 5 tentativas)
+    // gera order_code único
     let order_code = null;
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 8; i++) {
       const code = genOrderCode();
       const [check] = await connection.execute(
         "SELECT id FROM sales WHERE order_code = ? LIMIT 1",
@@ -93,12 +81,8 @@ router.post("/", async (req, res) => {
         break;
       }
     }
+    if (!order_code) return res.status(500).json({ msg: "Failed to generate order code" });
 
-    if (!order_code) {
-      return res.status(500).json({ msg: "Failed to generate order code" });
-    }
-
-    // MySQL JSON: manda string JSON
     const itemsJson = typeof items === "string" ? items : JSON.stringify(items);
 
     const [result] = await connection.execute(
@@ -121,8 +105,8 @@ router.post("/", async (req, res) => {
 
 /**
  * PATCH /sales/:id/status
- * Admin muda status (received -> in_progress -> sent)
- * body: { status: 'received'|'in_progress'|'sent'|'completed' }
+ * Admin muda status com validação (received -> in_progress -> sent)
+ * body: { status: 'in_progress' | 'sent' }
  */
 router.patch("/:id/status", async (req, res) => {
   try {
@@ -131,15 +115,32 @@ router.patch("/:id/status", async (req, res) => {
 
     if (!status) return res.status(400).json({ msg: "status is required" });
 
+    // pega status atual
+    const [rows] = await connection.execute("SELECT status FROM sales WHERE id = ?", [id]);
+    if (rows.length === 0) return res.status(404).json({ msg: "Order not found" });
+
+    const current = rows[0].status;
+
+    // valida transições
+    const allowed =
+      (current === "received" && status === "in_progress") ||
+      (current === "in_progress" && status === "sent");
+
+    if (!allowed) {
+      return res.status(400).json({ msg: `Invalid transition: ${current} -> ${status}` });
+    }
+
+    if (status === "in_progress") {
+      await connection.execute(
+        `UPDATE sales SET status = 'in_progress', accepted_at = NOW() WHERE id = ?`,
+        [id]
+      );
+    }
+
     if (status === "sent") {
       await connection.execute(
-        `UPDATE sales SET status = ?, sent_at = NOW() WHERE id = ?`,
-        [status, id]
-      );
-    } else {
-      await connection.execute(
-        `UPDATE sales SET status = ? WHERE id = ?`,
-        [status, id]
+        `UPDATE sales SET status = 'sent', sent_at = NOW() WHERE id = ?`,
+        [id]
       );
     }
 
@@ -157,6 +158,13 @@ router.patch("/:id/status", async (req, res) => {
 router.patch("/:id/confirm-received", async (req, res) => {
   try {
     const { id } = req.params;
+
+    // só confirma se estiver sent
+    const [rows] = await connection.execute("SELECT status FROM sales WHERE id = ?", [id]);
+    if (rows.length === 0) return res.status(404).json({ msg: "Order not found" });
+    if (rows[0].status !== "sent") {
+      return res.status(400).json({ msg: "Order is not marked as sent yet" });
+    }
 
     await connection.execute(
       `UPDATE sales
