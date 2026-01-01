@@ -3,24 +3,14 @@ const connection = require("../connection");
 
 const router = express.Router();
 
-/**
- * GET /contact-us
- * Query params opcionais:
- * - replied=0|1   (filtra inbox/replied)
- * - email=texto   (filtra por email com LIKE)
- *
- * Exemplos:
- *  /contact-us?replied=0
- *  /contact-us?replied=1
- *  /contact-us?replied=0&email=gmail.com
- */
+
 router.get("/", async (req, res) => {
   try {
-    const { replied, email } = req.query;
+    const { replied, email, order_code } = req.query;
 
     let sql = `
       SELECT 
-        id, name, email, orderNumber, phone, subject, message,
+        id, name, email, order_code, phone, subject, message,
         created_at, replied, replied_at
       FROM contactUs
       WHERE 1=1
@@ -35,6 +25,11 @@ router.get("/", async (req, res) => {
     if (email) {
       sql += " AND email LIKE ?";
       params.push(`%${email}%`);
+    }
+
+    if (order_code) {
+      sql += " AND order_code = ?";
+      params.push(String(order_code));
     }
 
     sql += " ORDER BY created_at DESC";
@@ -57,7 +52,7 @@ router.get("/:id", async (req, res) => {
     const [result] = await connection.execute(
       `
       SELECT 
-        id, name, email, orderNumber, phone, subject, message,
+        id, name, email, order_code, phone, subject, message,
         created_at, replied, replied_at
       FROM contactUs
       WHERE id = ?
@@ -78,23 +73,38 @@ router.get("/:id", async (req, res) => {
 
 /**
  * POST /contact-us
+ * Aceita:
+ * - order_code (novo, preferido)
+ * - orderNumber (legacy) -> converte pra string e usa como order_code se fizer sentido
  */
 router.post("/", async (req, res) => {
   try {
-    const { name, email, orderNumber, phone, subject, message } = req.body;
+    const { name, email, order_code, orderNumber, phone, subject, message } = req.body;
+
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ msg: "name, email, subject, message are required" });
+    }
+
+    // compat: se vier orderNumber antigo, tenta usar como order_code (ex: "456789")
+    const normalizedOrderCode =
+      (order_code && String(order_code).trim()) ||
+      (orderNumber !== undefined && orderNumber !== null ? String(orderNumber).trim() : null);
+
+    const safeOrderCode =
+      normalizedOrderCode && normalizedOrderCode.length ? normalizedOrderCode : null;
 
     const [result] = await connection.execute(
       `
-      INSERT INTO contactUs (name, email, orderNumber, phone, subject, message)
+      INSERT INTO contactUs (name, email, order_code, phone, subject, message)
       VALUES (?, ?, ?, ?, ?, ?)
       `,
-      [name, email, orderNumber ?? 0, phone ?? null, subject, message]
+      [name, email, safeOrderCode, phone ?? null, subject, message]
     );
 
     const [rows] = await connection.execute(
       `
       SELECT 
-        id, name, email, orderNumber, phone, subject, message,
+        id, name, email, order_code, phone, subject, message,
         created_at, replied, replied_at
       FROM contactUs
       WHERE id = ?
@@ -109,10 +119,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-/**
- * PATCH /contact-us/:id/reply
- * marca como respondida (replied=1 e replied_at=NOW())
- */
+
 router.patch("/:id/reply", async (req, res) => {
   try {
     const { id } = req.params;
@@ -134,7 +141,7 @@ router.patch("/:id/reply", async (req, res) => {
     const [rows] = await connection.execute(
       `
       SELECT 
-        id, name, email, orderNumber, phone, subject, message,
+        id, name, email, order_code, phone, subject, message,
         created_at, replied, replied_at
       FROM contactUs
       WHERE id = ?
@@ -150,4 +157,3 @@ router.patch("/:id/reply", async (req, res) => {
 });
 
 module.exports = router;
-

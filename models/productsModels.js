@@ -1,22 +1,22 @@
 const connection = require("../connection");
 
- async function getProductIdModel(id) {
-    const [result] = await connection.execute(
-    `SELECT * FROM products where id = ?`, [id]
+async function getProductIdModel(id) {
+  const [result] = await connection.execute(
+    "SELECT * FROM products WHERE id = ?",
+    [id]
   );
-  return result
+  return result;
 }
 
- async function getProductCategoryModel(category) {
-   const [result] = await connection.execute(
-    `SELECT * FROM products where category = ?`, [category]
+async function getProductCategoryModel(category) {
+  const [result] = await connection.execute(
+    "SELECT * FROM products WHERE category = ?",
+    [category]
   );
-  return result
+  return result;
 }
 
 module.exports = {
-    getProductIdModel,
-    getProductCategoryModel
-
-}
-
+  getProductIdModel,
+  getProductCategoryModel,
+};

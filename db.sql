@@ -1,52 +1,88 @@
+DROP DATABASE IF EXISTS db_fastFuel;
 CREATE DATABASE db_fastFuel;
-
 USE db_fastFuel;
 
+-- USERS
 CREATE TABLE users (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `fullName` VARCHAR(255) NOT NULL,
-    `phone` VARCHAR(255) NOT NUll,
-    `email` VARCHAR(255) NOT NULL UNIQUE,
-    `password` VARCHAR(255) NOT NUll,
-    `type` ENUM('admin', 'normal')
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  fullName VARCHAR(255) NOT NULL,
+  phone VARCHAR(50) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  type ENUM('admin','normal') NOT NULL DEFAULT 'normal',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- PRODUCTS
 CREATE TABLE products (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `name` VARCHAR(255) NOT NULL,
-    `price` DECIMAL(4, 2) NOT NULL,
-    `category` ENUM('desserts', 'sides', 'sandwiches', 'beverages'),
-    `image` VARCHAR(255) NOT NULL,
-    `description` VARCHAR(255) NOT NULL
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  category ENUM('desserts','sides','sandwiches','beverages') NOT NULL,
+  image VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- SALES
 CREATE TABLE sales (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `status` ENUM('accept', 'deny', 'pendent'),
-    `data` DATETIME DEFAULT NOW(),
-    `user_id` INT NOT NULL,
-    `items` JSON NOT NULL,
-    `total` DECIMAL(8, 2) NOT NULL,
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  order_code CHAR(6) NOT NULL UNIQUE,        
+  user_id INT NULL,                         
 
-    CONSTRAINT fk_sales_users
-      FOREIGN KEY (user_id)
-      REFERENCES users(id)
-      ON DELETE CASCADE
+  customer_name VARCHAR(80) NULL,
+  customer_email VARCHAR(120) NULL,
+
+  items JSON NOT NULL,                      
+  subtotal DECIMAL(10,2) NOT NULL DEFAULT 0,
+  discount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  total DECIMAL(10,2) NOT NULL DEFAULT 0,
+
+  status ENUM('received','in_progress','sent','done')
+    NOT NULL DEFAULT 'received',
+
+  accepted_at DATETIME NULL,                
+  sent_at DATETIME NULL,                  
+  received_confirmed_at DATETIME NULL,       
+
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ON UPDATE CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_sales_user
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE SET NULL,
+
+  INDEX idx_sales_status (status),
+  INDEX idx_sales_user_status (user_id, status),
+  INDEX idx_sales_created (created_at)
 );
 
+-- CONTACT US
 CREATE TABLE contactUs (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
-  orderNumber INT DEFAULT 0,
-  phone VARCHAR(255),
+  order_code CHAR(6) NULL,                   
+  phone VARCHAR(50),
   subject VARCHAR(255) NOT NULL,
-  message VARCHAR(300),
+  message VARCHAR(500) NOT NULL,
 
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   replied TINYINT(1) NOT NULL DEFAULT 0,
-  replied_at DATETIME NULL
+  replied_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_contact_order
+    FOREIGN KEY (order_code)
+    REFERENCES sales(order_code)
+    ON DELETE SET NULL,
+
+  INDEX idx_contact_email (email),
+  INDEX idx_contact_replied (replied),
+  INDEX idx_contact_order (order_code)
 );
 
 
- 

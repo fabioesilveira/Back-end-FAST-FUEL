@@ -1,9 +1,14 @@
-
 USE db_fastFuel;
 
+-- USERS 
+
 INSERT INTO users (fullName, phone, email, password, type)
-VALUES ('adm', '(11) 9999-8888', 'fast-fuel@admin.com', 'adminFF', 'admin' ),
+VALUES
+('adm', '(11) 9999-8888', 'fast-fuel@admin.com', 'adminFF', 'admin'),
 ('Jose M.', '(11) 4421-8888', 'jose@email.com', '123456', 'normal');
+
+
+-- PRODUCTS 
 
 INSERT INTO products (name, price, category, image, description) VALUES
 ('Pit Stop Classic / 350kcal', 5.00, 'sandwiches', 'https://media.istockphoto.com/id/2158592905/photo/beef-patty-burger-with-vegetables-and-lettuce-on-white-background-file-contains-clipping-path.jpg?s=612x612&w=0&k=20&c=1mUN5sPZh5A2SRhAqs3tFrFW9cHhA4REkuUTp1h_9lI=', 'Simple and fast—grilled beef patty, fresh lettuce, tomato, and cheese. Perfect for a quick fuel-up'),
@@ -28,20 +33,63 @@ INSERT INTO products (name, price, category, image, description) VALUES
 ('Chocolate Cookies / 320kcal', 2.00, 'desserts', 'https://media.officedepot.com/images/f_auto,q_auto,e_sharpen,h_450/products/216390/216390_o02/216390', 'Warm, soft, and loaded cookies with melty chocolate chips. Classic comfort in every bite, always delicious.'),
 ('Carrot Cake / 420kcal', 4.00, 'desserts', 'https://static.vecteezy.com/system/resources/thumbnails/049/390/139/small_2x/delicious-carrot-cake-slice-with-cream-cheese-frosting-and-pecan-toppings-transparent-background-png.png', 'Moist and spiced with a hint of cinnamon, layered with smooth cream cheese frosting, perfectly irresistible.');
 
-INSERT INTO sales(status, items, total, user_id) 
-VALUES ('pendent', '{"name": "Strawberry Sundae", "quantity": 2, "price": 3}', 6.00, 1);
 
+-- SALES 
 
-INSERT INTO contactUs (name, email, orderNumber, phone, subject, message, replied, replied_at)
+INSERT INTO sales (
+  order_code, user_id, customer_name, customer_email,
+  items, subtotal, discount, total,
+  status, accepted_at, sent_at, received_confirmed_at
+) VALUES
+(
+  '028391', 2, 'Jose M.', 'jose@email.com',
+  JSON_ARRAY(
+    JSON_OBJECT('product_id', 15, 'name', 'Chocolate Milkshake / 420kcal', 'qty', 1, 'unit_price', 4.00),
+    JSON_OBJECT('product_id', 11, 'name', 'French Fries / 300kcal', 'qty', 1, 'unit_price', 3.00),
+    JSON_OBJECT('product_id', 1,  'name', 'Pit Stop Classic / 350kcal', 'qty', 1, 'unit_price', 5.00)
+  ),
+  12.00, 2.00, 10.00,
+  'in_progress',
+  NOW(), NULL, NULL
+),
+(
+  '774210', NULL, 'Guest Customer', 'guest@email.com',
+  JSON_ARRAY(
+    JSON_OBJECT('product_id', 16, 'name', 'Strawberry Sundae / 280kcal', 'qty', 2, 'unit_price', 3.00)
+  ),
+  6.00, 0.00, 6.00,
+  'received',
+  NULL, NULL, NULL
+),
+(
+  '556677', 2, 'Jose M.', 'jose@email.com',
+  JSON_ARRAY(
+    JSON_OBJECT('product_id', 2, 'name', 'Turbo Bacon / 450kcal', 'qty', 1, 'unit_price', 7.00),
+    JSON_OBJECT('product_id', 11, 'name', 'French Fries / 300kcal', 'qty', 1, 'unit_price', 3.00),
+    JSON_OBJECT('product_id', 5, 'name', 'Coke / 150kcal', 'qty', 1, 'unit_price', 2.50)
+  ),
+  12.50, 2.00, 10.50,
+  'sent',
+  NOW(), NOW(), NULL
+),
+(
+  '112233', 2, 'Jose M.', 'jose@email.com',
+  JSON_ARRAY(
+    JSON_OBJECT('product_id', 3, 'name', 'Double Gear / 510kcal', 'qty', 1, 'unit_price', 9.00)
+  ),
+  9.00, 0.00, 9.00,
+  'done',
+  NOW(), NOW(), NOW()
+);
+
+-- CONTACT US 
+
+INSERT INTO contactUs (name, email, order_code, phone, subject, message, replied, replied_at)
 VALUES
-('Fabio','fabio@email.com',456789,'4245421073','Order not delivered','I need to know about my order, it was supposed to arrive yesterday.',0,NULL),
-('Maria Silva','maria@gmail.com',0,'5551112222','Payment issue','My card was charged twice and I only placed one order.',0,NULL),
-('John Doe','john@yahoo.com',1234,NULL,'Order delay','My order is taking too long, can you check what is going on?',0,NULL),
-('Ana Costa','ana.costa@gmail.com',99887,'5553339999','Wrong item','I received a different burger than the one I ordered.',0,NULL),
-('Lucas Pereira','lucas.p@gmail.com',0,'5558887777','App issue','The app crashes every time I try to checkout.',0,NULL),
-('Mark Johnson','mark.j@gmail.com',556677,'5554441111','Missing item','One item was missing from my order.',1,'2025-12-19 14:32:00'),
-('Sofia Martinez','sofia@gmail.com',223344,NULL,'Refund request','I would like a refund for my last order.',1,'2025-12-18 10:15:00'),
-('Carlos Mendes','carlos.m@gmail.com',778899,'5552223333','Late delivery','The delivery arrived very late and the food was cold.',1,'2025-12-20 09:48:00'),
-('Emily Brown','emily.brown@yahoo.com',0,'5559990000','Account problem','I cannot log into my account after resetting my password.',1,'2025-12-17 16:05:00'),
-('Rafael Lima','rafael.lima@gmail.com',445566,NULL,'Promo code','The promo code did not apply at checkout.',1,'2025-12-16 11:22:00');
-
+('Fabio','fabio@email.com','774210','4245421073','Order not delivered','I need to know about my order, it was supposed to arrive yesterday.',0,NULL),
+('Maria Silva','maria@gmail.com',NULL,'5551112222','Payment issue','My card was charged twice and I only placed one order.',0,NULL),
+('John Doe','john@yahoo.com','028391',NULL,'Order delay','My order is taking too long, can you check what is going on?',0,NULL),
+('Ana Costa','ana.costa@gmail.com','556677','5553339999','Wrong item','I received a different burger than the one I ordered.',0,NULL),
+('Lucas Pereira','lucas.p@gmail.com',NULL,'5558887777','App issue','The app crashes every time I try to checkout.',0,NULL),
+('Mark Johnson','mark.j@gmail.com','556677','5554441111','Missing item','One item was missing from my order.',1,'2025-12-19 14:32:00'),
+('Sofia Martinez','sofia@gmail.com','112233',NULL,'Refund request','I would like a refund for my last order.',1,'2025-12-18 10:15:00');
