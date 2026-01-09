@@ -29,23 +29,23 @@ CREATE TABLE products (
 -- SALES
 CREATE TABLE sales (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  order_code CHAR(6) NOT NULL UNIQUE,        
-  user_id INT NULL,                         
+  order_code CHAR(6) NOT NULL UNIQUE,
+  user_id INT NULL,
 
   customer_name VARCHAR(80) NULL,
   customer_email VARCHAR(120) NULL,
 
-  items JSON NOT NULL,                      
-  subtotal DECIMAL(10,2) NOT NULL DEFAULT 0,
-  discount DECIMAL(10,2) NOT NULL DEFAULT 0,
-  total DECIMAL(10,2) NOT NULL DEFAULT 0,
+  items JSON NOT NULL,
+  subtotal DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  discount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  total DECIMAL(10,2) NOT NULL DEFAULT 0.00,
 
-  status ENUM('received','in_progress','sent','done')
+  status ENUM('received','in_progress','sent','completed')
     NOT NULL DEFAULT 'received',
 
-  accepted_at DATETIME NULL,                
-  sent_at DATETIME NULL,                  
-  received_confirmed_at DATETIME NULL,       
+  accepted_at DATETIME NULL,
+  sent_at DATETIME NULL,
+  received_confirmed_at DATETIME NULL,
 
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -58,7 +58,9 @@ CREATE TABLE sales (
 
   INDEX idx_sales_status (status),
   INDEX idx_sales_user_status (user_id, status),
-  INDEX idx_sales_created (created_at)
+  INDEX idx_sales_created (created_at),
+  INDEX idx_sales_order_code (order_code),
+  INDEX idx_sales_customer_email (customer_email)
 );
 
 -- CONTACT US
@@ -66,8 +68,8 @@ CREATE TABLE contactUs (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
-  order_code CHAR(6) NULL,                   
-  phone VARCHAR(50),
+  order_code CHAR(6) NULL,
+  phone VARCHAR(50) NULL,
   subject VARCHAR(255) NOT NULL,
   message VARCHAR(500) NOT NULL,
 
@@ -84,5 +86,4 @@ CREATE TABLE contactUs (
   INDEX idx_contact_replied (replied),
   INDEX idx_contact_order (order_code)
 );
-
 

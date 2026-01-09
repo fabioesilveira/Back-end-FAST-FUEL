@@ -3,7 +3,9 @@ const connection = require("../connection");
 
 const router = express.Router();
 
-
+/**
+ * GET /contact-us?replied=0|1&email=...&order_code=ABC123
+ */
 router.get("/", async (req, res) => {
   try {
     const { replied, email, order_code } = req.query;
@@ -72,33 +74,55 @@ router.get("/:id", async (req, res) => {
 });
 
 /**
+ * helper: normaliza order_code
+ * - aceita order_code ou orderNumber
+ * - remove não dígitos
+ * - só aceita 6 dígitos
+ * - ignora "", null, undefined, "0"
+ */
+function normalizeOrderCode({ order_code, orderNumber }) {
+  const raw =
+    (order_code != null ? String(order_code).trim() : "") ||
+    (orderNumber != null ? String(orderNumber).trim() : "");
+
+  if (!raw || raw === "0") return null;
+
+  const cleaned = raw.replace(/\D/g, "");
+  if (cleaned.length !== 6) return null;
+
+  return cleaned;
+}
+
+/**
  * POST /contact-us
- * Aceita:
- * - order_code (novo, preferido)
- * - orderNumber (legacy) -> converte pra string e usa como order_code se fizer sentido
+ * body: { name, email, order_code? | orderNumber?, phone?, subject, message }
  */
 router.post("/", async (req, res) => {
   try {
-    const { name, email, order_code, orderNumber, phone, subject, message } = req.body;
+    const { name, email, phone, subject, message } = req.body;
+    const safeOrderCode = normalizeOrderCode(req.body); // ✅ aqui
 
     if (!name || !email || !subject || !message) {
       return res.status(400).json({ msg: "name, email, subject, message are required" });
     }
 
-    // compat: se vier orderNumber antigo, tenta usar como order_code (ex: "456789")
-    const normalizedOrderCode =
-      (order_code && String(order_code).trim()) ||
-      (orderNumber !== undefined && orderNumber !== null ? String(orderNumber).trim() : null);
-
-    const safeOrderCode =
-      normalizedOrderCode && normalizedOrderCode.length ? normalizedOrderCode : null;
+    let finalOrderCode = safeOrderCode;
+    if (finalOrderCode) {
+      const [exists] = await connection.execute(
+        "SELECT 1 FROM sales WHERE order_code = ? LIMIT 1",
+        [finalOrderCode]
+      );
+      if (exists.length === 0) {
+        finalOrderCode = null;
+      }
+    }
 
     const [result] = await connection.execute(
       `
       INSERT INTO contactUs (name, email, order_code, phone, subject, message)
       VALUES (?, ?, ?, ?, ?, ?)
       `,
-      [name, email, safeOrderCode, phone ?? null, subject, message]
+      [name, email, finalOrderCode, phone ?? null, subject, message]
     );
 
     const [rows] = await connection.execute(
@@ -119,7 +143,9 @@ router.post("/", async (req, res) => {
   }
 });
 
-
+/**
+ * PATCH /contact-us/:id/reply
+ */
 router.patch("/:id/reply", async (req, res) => {
   try {
     const { id } = req.params;
