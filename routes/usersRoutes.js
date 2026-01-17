@@ -1,5 +1,6 @@
 const express = require("express");
 const connection = require("../connection");
+const { postUserController } = require("../controllers/userController");
 
 const router = express.Router();
 
@@ -30,40 +31,7 @@ router.get("/", async (req, res) => {
 });
 
 // Register
-router.post("/register", async (req, res) => {
-    try {
-        const { fullName, phone, email, password } = req.body;
-
-        if (!fullName || !phone || !email || !password) {
-            return res.status(400).json({ msg: "All fields are required" });
-        }
-
-        const [existing] = await connection.execute(
-            "SELECT id FROM users WHERE email = ? LIMIT 1",
-            [email]
-        );
-
-        if (existing.length > 0) {
-            return res.status(409).json({ msg: "User already exists" });
-        }
-
-        const [result] = await connection.execute(
-            `INSERT INTO users (fullName, phone, email, password, type)
-       VALUES (?, ?, ?, ?, 'normal')`,
-            [fullName, phone, email, password]
-        );
-
-        return res.status(201).json({
-            id: result.insertId,
-            userName: fullName,
-            email,
-            type: "normal",
-        });
-    } catch (error) {
-        console.error("REGISTER ERROR:", error);
-        return res.status(500).json({ msg: "Internal server error" });
-    }
-});
+router.post("/register", postUserController);
 
 // Login
 router.post("/login", async (req, res) => {
