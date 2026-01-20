@@ -36,9 +36,16 @@ CREATE TABLE sales (
   customer_email VARCHAR(120) NULL,
 
   items JSON NOT NULL,
+
   subtotal DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   discount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  tax DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  delivery_fee DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   total DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+
+  tax_rate DECIMAL(5,4) NOT NULL DEFAULT 0.0900,
+  delivery_fee_base DECIMAL(10,2) NOT NULL DEFAULT 9.99,
+  free_delivery_threshold DECIMAL(10,2) NOT NULL DEFAULT 30.00,
 
   status ENUM('received','in_progress','sent','completed')
     NOT NULL DEFAULT 'received',
@@ -61,7 +68,32 @@ CREATE TABLE sales (
   INDEX idx_sales_created (created_at),
   INDEX idx_sales_order_code (order_code),
   INDEX idx_sales_customer_email (customer_email)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- CONTACT US
+CREATE TABLE contactUs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  order_code CHAR(6) NULL,
+  phone VARCHAR(50) NULL,
+  subject VARCHAR(255) NOT NULL,
+  message VARCHAR(500) NOT NULL,
+
+  replied TINYINT(1) NOT NULL DEFAULT 0,
+  replied_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_contact_order
+    FOREIGN KEY (order_code)
+    REFERENCES sales(order_code)
+    ON DELETE SET NULL,
+
+  INDEX idx_contact_email (email),
+  INDEX idx_contact_replied (replied),
+  INDEX idx_contact_order (order_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 -- CONTACT US
 CREATE TABLE contactUs (
