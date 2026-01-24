@@ -1,4 +1,28 @@
-const { postUserService } = require("../services/userService");
+const { postUserService, postUserLoginService, } = require("../services/userService");
+
+async function postUserLoginController(req, res) {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ msg: "Email and password are required" });
+        }
+
+        const user = await postUserLoginService(email, password);
+
+        console.log(user)
+
+        return res.status(200).json({
+            id: user.id,
+            userName: user.fullName,
+            email: user.email,
+            type: user.type,
+        });
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ msg: "Login failed" });
+    }
+}
 
 async function postUserController(req, res) {
     try {
@@ -21,4 +45,4 @@ async function postUserController(req, res) {
     }
 }
 
-module.exports = { postUserController }
+module.exports = { postUserController, postUserLoginController }

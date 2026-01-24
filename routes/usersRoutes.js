@@ -1,6 +1,6 @@
 const express = require("express");
 const connection = require("../connection");
-const { postUserController } = require("../controllers/userController");
+const { postUserController, postUserLoginController } = require("../controllers/userController");
 
 const router = express.Router();
 
@@ -34,40 +34,7 @@ router.get("/", async (req, res) => {
 router.post("/register", postUserController);
 
 // Login
-router.post("/login", async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        if (!email || !password) {
-            return res.status(400).json({ msg: "Email and password are required" });
-        }
-
-        const [result] = await connection.execute(
-            "SELECT id, fullName, email, password, type FROM users WHERE email = ? LIMIT 1",
-            [email]
-        );
-
-        if (result.length === 0) {
-            return res.status(404).json({ msg: "User not found" });
-        }
-
-        const user = result[0];
-
-        if (user.password !== password) {
-            return res.status(401).json({ msg: "Invalid password" });
-        }
-
-        return res.status(200).json({
-            id: user.id,
-            userName: user.fullName,
-            email: user.email,
-            type: user.type,
-        });
-    } catch (e) {
-        console.error(e);
-        return res.status(500).json({ msg: "Login failed" });
-    }
-});
+router.post("/login", postUserLoginController);
 
 // Update password
 router.put("/:id", async (req, res) => {

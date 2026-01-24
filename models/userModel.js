@@ -3,7 +3,7 @@ const connection = require("../connection");
 async function findUserByEmail(email) {
 
     const [existing] = await connection.execute(
-        "SELECT id FROM users WHERE email = ? LIMIT 1",
+        "SELECT * FROM users WHERE email = ? LIMIT 1",
         [email]
     );
 
