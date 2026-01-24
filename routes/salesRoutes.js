@@ -1,3 +1,4 @@
+// routes/sales.js
 const express = require("express");
 const connection = require("../connection");
 
@@ -9,6 +10,13 @@ function genOrderCode() {
 
 const VALID_STATUS = new Set(["received", "in_progress", "sent", "completed"]);
 
+// Payment simulation
+const VALID_PAYMENT_METHOD = new Set(["card", "apple_pay", "google_pay", "cash"]);
+
+function genPaymentRef() {
+  return "SIM-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+}
+
 // Rules Fees
 const TAX_RATE = 0.09;
 const DELIVERY_FEE = 9.99;
@@ -16,6 +24,16 @@ const FREE_DELIVERY_THRESHOLD = 30.0;
 
 function round2(n) {
   return Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+}
+
+function safeJsonParse(value, fallback) {
+  try {
+    if (value === null || value === undefined) return fallback;
+    if (typeof value === "string") return JSON.parse(value);
+    return value;
+  } catch {
+    return fallback;
+  }
 }
 
 function normalizeItems(items) {
@@ -34,8 +52,7 @@ function normalizeItems(items) {
   const norm = parsed
     .map((it) => {
       const id = it?.id ?? it?.product_id ?? it?.productId;
-      const qtyRaw =
-        it?.quantidade ?? it?.quantity ?? it?.qty ?? 1;
+      const qtyRaw = it?.quantidade ?? it?.quantity ?? it?.qty ?? 1;
 
       const qty = Math.max(1, Number(qtyRaw) || 1);
 
@@ -124,6 +141,44 @@ async function calcTotalsFromDb(itemsNorm) {
   };
 }
 
+// (helper) busca produtos e monta snapshot (pra Orders page)
+async function buildItemsSnapshot(itemsNorm) {
+  if (!itemsNorm || itemsNorm.length === 0) return [];
+
+  const ids = [...new Set(itemsNorm.map((x) => x.id))];
+
+  const [rows] = await connection.execute(
+    `SELECT id, name, price, category, image
+     FROM products
+     WHERE id IN (${ids.map(() => "?").join(",")})`,
+    ids
+  );
+
+  const byId = new Map(rows.map((p) => [String(p.id), p]));
+
+  return itemsNorm.map((it) => {
+    const p = byId.get(String(it.id));
+    return {
+      id: String(it.id),
+      name: p?.name ?? "Item",
+      price: Number(p?.price ?? 0),
+      category: p?.category ?? null,
+      image: p?.image ?? null,
+      qty: it.qty,
+    };
+  });
+}
+
+function parseSaleRow(row) {
+  return {
+    ...row,
+    items: safeJsonParse(row.items, []),
+    items_snapshot: safeJsonParse(row.items_snapshot, []),
+    delivery_address: safeJsonParse(row.delivery_address, null),
+  };
+}
+
+
 // GET /sales
 router.get("/", async (req, res) => {
   try {
@@ -169,7 +224,7 @@ router.get("/", async (req, res) => {
     sql += " ORDER BY created_at DESC";
 
     const [result] = await connection.execute(sql, params);
-    return res.json(result);
+    return res.json(result.map(parseSaleRow));
   } catch (e) {
     console.error(e);
     return res.status(500).json({ msg: "Failed to load sales" });
@@ -181,13 +236,10 @@ router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [result] = await connection.execute(
-      "SELECT * FROM sales WHERE id = ?",
-      [id]
-    );
+    const [result] = await connection.execute("SELECT * FROM sales WHERE id = ?", [id]);
 
     if (result.length === 0) return res.status(404).json({ msg: "cannot find" });
-    return res.json(result[0]);
+    return res.json(parseSaleRow(result[0]));
   } catch (e) {
     console.error(e);
     return res.status(500).json({ msg: "Failed to load sale" });
@@ -195,7 +247,7 @@ router.get("/:id", async (req, res) => {
 });
 
 /**
- * POST /sales/quote 
+ * POST /sales/quote
  * retorna breakdown sem salvar
  */
 router.post("/quote", async (req, res) => {
@@ -232,6 +284,8 @@ router.post("/", async (req, res) => {
       customer_name = null,
       customer_email = null,
       items,
+      payment_method = "card",
+      delivery_address = null,
     } = req.body;
 
     if (!items) return res.status(400).json({ msg: "items is required" });
@@ -241,6 +295,10 @@ router.post("/", async (req, res) => {
     if (itemsNorm.length === 0) return res.status(400).json({ msg: "items cannot be empty" });
 
     const breakdown = await calcTotalsFromDb(itemsNorm);
+
+    // snapshot com nome/preço/etc pra Orders page
+
+    const itemsSnapshot = await buildItemsSnapshot(itemsNorm);
 
     // order_code único
     let order_code = null;
@@ -257,24 +315,37 @@ router.post("/", async (req, res) => {
     }
     if (!order_code) return res.status(500).json({ msg: "Failed to generate order code" });
 
-    // salva o JSON normalizado (id + qty) 
+    // salva o JSON normalizado (id + qty)
     const itemsJson = JSON.stringify(itemsNorm);
+    const itemsSnapshotJson = JSON.stringify(itemsSnapshot);
+    const deliveryAddressJson = delivery_address ? JSON.stringify(delivery_address) : null;
+
+
+    // payment simulation
+    const payMethod = VALID_PAYMENT_METHOD.has(payment_method) ? payment_method : "card";
+    const payment_status = payMethod === "cash" ? "pending" : "approved";
+    const payment_ref = genPaymentRef();
 
     const [result] = await connection.execute(
-      `INSERT INTO sales
-        (
-          order_code, user_id, customer_name, customer_email, items,
-          subtotal, discount, tax, delivery_fee, total,
-          tax_rate, delivery_fee_base, free_delivery_threshold,
-          status
-        )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'received')`,
+      `INSERT INTO sales (
+    order_code, user_id, customer_name, customer_email, delivery_address,
+    payment_method, payment_status, payment_ref,
+    items, items_snapshot,
+    subtotal, discount, tax, delivery_fee, total,
+    tax_rate, delivery_fee_base, free_delivery_threshold,
+    status
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'received')`,
       [
         order_code,
         user_id,
         customer_name,
         customer_email,
+        deliveryAddressJson,
+        payMethod,
+        payment_status,
+        payment_ref,
         itemsJson,
+        itemsSnapshotJson,
         breakdown.subtotal,
         breakdown.discount,
         breakdown.tax,
@@ -286,10 +357,17 @@ router.post("/", async (req, res) => {
       ]
     );
 
+
     return res.status(201).json({
       id: result.insertId,
       order_code,
       status: "received",
+      delivery_address: delivery_address ?? null,
+      payment_method: payMethod,
+      payment_status,
+      payment_ref,
+      items: itemsNorm,
+      items_snapshot: itemsSnapshot,
       ...breakdown,
       rules: {
         tax_rate: TAX_RATE,
