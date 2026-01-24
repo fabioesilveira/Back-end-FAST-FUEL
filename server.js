@@ -1,14 +1,16 @@
 const app = require("./app");
 const connection = require("./connection");
 
-// Iniciar a aplicacao
-const PORT = 3000;
-app.listen(PORT, async () => {
-  console.log(`A conexão está sendo executada na porta ${PORT}`);
+const PORT = process.env.PORT || 3000;
 
-  // O código abaixo é para testarmos a comunicação com o MySQL
-  const [result] = await connection.execute("SELECT 1");
-  if (result) {
-    console.log("Conexão ao BD feita com sucesso!");
+app.listen(PORT, async () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+
+  try {
+    const [result] = await connection.execute("SELECT 1");
+    if (result) console.log("Conexão ao BD feita com sucesso!");
+  } catch (err) {
+    console.error("⚠️ Falha ao conectar no MySQL (não vou derrubar o servidor):");
+    console.error(err.message);
   }
 });
