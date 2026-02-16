@@ -53,6 +53,11 @@ async function postUserController(req, res) {
         });
     } catch (error) {
         console.error("REGISTER ERROR:", error);
+
+        if (error?.code === "ER_DUP_ENTRY") {
+            return res.status(409).json({ msg: "This email is already in use" });
+        }
+
         return res.status(500).json({ msg: "Internal server error" });
     }
 }
