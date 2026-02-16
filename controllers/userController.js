@@ -12,12 +12,7 @@ async function postUserLoginController(req, res) {
 
         console.log(user)
 
-        return res.status(200).json({
-            id: user.id,
-            userName: user.fullName,
-            email: user.email,
-            type: user.type,
-        });
+        return res.status(200).json(user);
     } catch (e) {
         console.error(e);
         return res.status(500).json({ msg: "Login failed" });

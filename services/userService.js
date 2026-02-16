@@ -1,22 +1,26 @@
 const { findUserByEmail, createNewUser } = require("../models/userModel");
 const bcryptjs = require("bcryptjs");
+const { generateToken } = require("../utils/jwt");
 
 async function postUserLoginService(email, password) {
 
-    const result = await findUserByEmail(email);
+    const [result] = await findUserByEmail(email);
 
     if (result.length === 0) {
         return { msg: "User not found" };
     }
 
-    const user = result[0];
+    const isPasswordValid = await bcryptjs.compare(password, result.password)
 
-    console.log(user)
-
-    if (user.password !== password) {
-        return { msg: "Invalid password" };
+    if (!isPasswordValid) {
+        return { msg: "Invalid Password" }
     }
-    return user;
+
+    const payLoad = { email: result.email, id: result.id, fullName: result.fullName }
+    const token = generateToken(payLoad)
+    payLoad.token = token
+
+    return payLoad;
 }
 
 async function postUserService(fullName, phone, email, password) {

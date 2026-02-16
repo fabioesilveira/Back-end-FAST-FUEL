@@ -4,6 +4,7 @@ const {
   getProductIdController,
   getProductCategoryController,
 } = require("../controllers/productsControllers.js");
+const authMiddleware = require("../middlewares/authMiddleware.js");
 
 const router = express.Router();
 
