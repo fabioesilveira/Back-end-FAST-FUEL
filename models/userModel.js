@@ -1,23 +1,21 @@
 const connection = require("../connection");
 
 async function findUserByEmail(email) {
-
-    const [existing] = await connection.execute(
-        "SELECT * FROM users WHERE email = ? LIMIT 1",
-        [email]
+    const e = String(email || "").trim().toLowerCase();
+    const [rows] = await connection.execute(
+        "SELECT * FROM users WHERE LOWER(email) = ? LIMIT 1",
+        [e]
     );
-
-    return existing
-
+    return rows; // array
 }
 
-async function createNewUser(fullName, phone, email, password) {
+async function createNewUser(fullName, phone, email, passwordHash) {
     const [result] = await connection.execute(
         `INSERT INTO users (fullName, phone, email, password, type)
-       VALUES (?, ?, ?, ?, 'normal')`,
-        [fullName, phone, email, password]
+     VALUES (?, ?, ?, ?, 'normal')`,
+        [fullName, phone, email, passwordHash]
     );
-    return result
+    return result;
 }
 
 module.exports = { findUserByEmail, createNewUser }

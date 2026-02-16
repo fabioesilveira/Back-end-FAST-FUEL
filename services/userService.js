@@ -3,38 +3,31 @@ const bcryptjs = require("bcryptjs");
 const { generateToken } = require("../utils/jwt");
 
 async function postUserLoginService(email, password) {
+    const rows = await findUserByEmail(email);
+    const user = rows[0];
 
-    const [result] = await findUserByEmail(email);
+    if (!user) return { msg: "User not found" };
 
-    if (result.length === 0) {
-        return { msg: "User not found" };
-    }
+    const ok = await bcryptjs.compare(password, user.password);
+    if (!ok) return { msg: "Invalid Password" };
 
-    const isPasswordValid = await bcryptjs.compare(password, result.password)
+    const payload = { id: user.id, email: user.email, fullName: user.fullName, type: user.type };
+    const token = generateToken(payload);
 
-    if (!isPasswordValid) {
-        return { msg: "Invalid Password" }
-    }
-
-    const payLoad = { email: result.email, id: result.id, fullName: result.fullName }
-    const token = generateToken(payLoad)
-    payLoad.token = token
-
-    return payLoad;
+    return { ...payload, token };
 }
+
 
 async function postUserService(fullName, phone, email, password) {
+    const e = String(email || "").trim().toLowerCase();
 
-    const existing = await findUserByEmail(email)
-
-    if (existing.length > 0) {
-        return { msg: "User already exists" };
-    }
+    const existing = await findUserByEmail(e);
+    if (existing.length > 0) return { msg: "User already exists" };
 
     const hashedPassword = await bcryptjs.hash(password, 10);
-    const result = await createNewUser(fullName, phone, email, hashedPassword);
-
+    const result = await createNewUser(fullName, phone, e, hashedPassword);
     return result;
 }
+
 
 module.exports = { postUserService, postUserLoginService }

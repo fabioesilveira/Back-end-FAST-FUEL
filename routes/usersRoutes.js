@@ -1,11 +1,14 @@
 const express = require("express");
 const connection = require("../connection");
+const authMiddleware = require("../middlewares/authMiddleware");
+const requireAdmin = require("../middlewares/requireAdmin");
+const bcryptjs = require("bcryptjs");
 const { postUserController, postUserLoginController } = require("../controllers/userController");
 
 const router = express.Router();
 
-// Admin list (sem password)
-router.get("/admin", async (req, res) => {
+// Admin list 
+router.get("/admin", authMiddleware, requireAdmin, async (req, res) => {
     try {
         const [result] = await connection.execute(
             "SELECT id, fullName, phone, email, type, created_at FROM users ORDER BY id DESC"
@@ -17,7 +20,7 @@ router.get("/admin", async (req, res) => {
     }
 });
 
-// Normal users list (sem password)
+// Normal users list 
 router.get("/", async (req, res) => {
     try {
         const [result] = await connection.execute(
@@ -41,52 +44,44 @@ router.put("/:id", async (req, res) => {
     try {
         const { password } = req.body;
         const { id } = req.params;
-
         if (!password) return res.status(400).json({ msg: "password is required" });
+
+        const hashed = await bcryptjs.hash(String(password), 10);
 
         const [result] = await connection.execute(
             "UPDATE users SET password = ? WHERE id = ?",
-            [password, id]
+            [hashed, id]
         );
 
-        return res.json(result);
+        return res.json({ affectedRows: result.affectedRows });
     } catch (e) {
         console.error(e);
         return res.status(500).json({ msg: "Failed to update password" });
     }
 });
 
-// Delete by email + password 
-router.delete("/removeUser", async (req, res) => {
-    try {
-        const email = String(req.body?.email || "").trim().toLowerCase();
-        const password = String(req.body?.password || "").trim();
 
-        if (!email || !password) {
-            return res.status(400).json({ msg: "email and password required" });
-        }
+router.delete("/removeUser", authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id; // vem do token
 
         const [result] = await connection.execute(
-            "DELETE FROM users WHERE LOWER(email) = ? AND password = ?",
-            [email, password]
+            "DELETE FROM users WHERE id = ?",
+            [userId]
         );
 
         if (!result.affectedRows) {
-            return res.status(404).json({
-                affectedRows: 0,
-                msg: "Email and password do not match any account.",
-            });
+            return res.status(404).json({ msg: "User not found" });
         }
 
-        return res.json({
-            affectedRows: result.affectedRows,
-            msg: "User deleted",
-        });
+        return res.json({ affectedRows: result.affectedRows, msg: "User deleted" });
     } catch (e) {
         console.error(e);
         return res.status(500).json({ msg: "Failed to remove user" });
     }
 });
+
+
 
 // Get user by id
 router.get("/:id", async (req, res) => {

@@ -1,16 +1,26 @@
-const { postUserService, postUserLoginService, } = require("../services/userService");
+const { postUserService, postUserLoginService } = require("../services/userService");
+const { normalizeEmail } = require("../utils/normalize");
 
 async function postUserLoginController(req, res) {
     try {
-        const { email, password } = req.body;
+        let { email, password } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({ msg: "Email and password are required" });
         }
 
+        email = normalizeEmail(email);
+
         const user = await postUserLoginService(email, password);
 
-        console.log(user)
+        if (user?.msg) {
+            const code =
+                user.msg === "User not found" ? 404 :
+                    user.msg === "Invalid Password" ? 401 :
+                        400;
+
+            return res.status(code).json(user);
+        }
 
         return res.status(200).json(user);
     } catch (e) {
@@ -21,17 +31,24 @@ async function postUserLoginController(req, res) {
 
 async function postUserController(req, res) {
     try {
-        const { fullName, phone, email, password } = req.body;
+        let { fullName, phone, email, password } = req.body;
 
         if (!fullName || !phone || !email || !password) {
             return res.status(400).json({ msg: "All fields are required" });
         }
-        const data = await postUserService(fullName, phone, email, password)
+
+        email = normalizeEmail(email);
+
+        const data = await postUserService(fullName, phone, email, password);
+
+        if (data?.msg) {
+            return res.status(409).json(data);
+        }
 
         return res.status(201).json({
             id: data.insertId,
-            userName: data.fullName,
-            email: data.email,
+            userName: fullName,
+            email,
             type: "normal",
         });
     } catch (error) {
@@ -40,4 +57,4 @@ async function postUserController(req, res) {
     }
 }
 
-module.exports = { postUserController, postUserLoginController }
+module.exports = { postUserController, postUserLoginController };
