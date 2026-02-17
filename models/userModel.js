@@ -10,12 +10,16 @@ async function findUserByEmail(email) {
 }
 
 async function createNewUser(fullName, phone, email, passwordHash) {
+    const e = String(email || "").trim().toLowerCase();
+
     const [result] = await connection.execute(
         `INSERT INTO users (fullName, phone, email, password, type)
      VALUES (?, ?, ?, ?, 'normal')`,
-        [fullName, phone, email, passwordHash]
+        [fullName, phone, e, passwordHash]
     );
+
     return result;
 }
+
 
 module.exports = { findUserByEmail, createNewUser }

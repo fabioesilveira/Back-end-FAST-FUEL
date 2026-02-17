@@ -3,7 +3,9 @@ const bcryptjs = require("bcryptjs");
 const { generateToken } = require("../utils/jwt");
 
 async function postUserLoginService(email, password) {
-    const rows = await findUserByEmail(email);
+    const e = String(email || "").trim().toLowerCase();
+
+    const rows = await findUserByEmail(e);
     const user = rows[0];
 
     if (!user) return { msg: "User not found" };
@@ -11,7 +13,13 @@ async function postUserLoginService(email, password) {
     const ok = await bcryptjs.compare(password, user.password);
     if (!ok) return { msg: "Invalid Password" };
 
-    const payload = { id: user.id, email: user.email, fullName: user.fullName, type: user.type };
+    const payload = {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        type: user.type || "customer", // fallback
+    };
+
     const token = generateToken(payload);
 
     return { ...payload, token };

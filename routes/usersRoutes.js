@@ -7,7 +7,7 @@ const { postUserController, postUserLoginController } = require("../controllers/
 
 const router = express.Router();
 
-// Admin list 
+// Admin list
 router.get("/admin", authMiddleware, requireAdmin, async (req, res) => {
     try {
         const [result] = await connection.execute(
@@ -20,8 +20,8 @@ router.get("/admin", authMiddleware, requireAdmin, async (req, res) => {
     }
 });
 
-// Normal users list 
-router.get("/", async (req, res) => {
+// Normal users list
+router.get("/", authMiddleware, requireAdmin, async (req, res) => {
     try {
         const [result] = await connection.execute(
             "SELECT id, fullName, phone, email, created_at FROM users WHERE type = 'normal' ORDER BY id DESC"
@@ -36,15 +36,23 @@ router.get("/", async (req, res) => {
 // Register
 router.post("/register", postUserController);
 
-// Login
+// Login 
 router.post("/login", postUserLoginController);
 
 // Update password
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, async (req, res) => {
     try {
         const { password } = req.body;
         const { id } = req.params;
+
         if (!password) return res.status(400).json({ msg: "password is required" });
+
+        const isSelf = String(req.user.id) === String(id);
+        const isAdmin = req.user.type === "admin";
+
+        if (!isSelf && !isAdmin) {
+            return res.status(403).json({ msg: "Sem permissão" });
+        }
 
         const hashed = await bcryptjs.hash(String(password), 10);
 
@@ -60,15 +68,12 @@ router.put("/:id", async (req, res) => {
     }
 });
 
-
+// Delete own account (logado)
 router.delete("/removeUser", authMiddleware, async (req, res) => {
     try {
-        const userId = req.user.id; // vem do token
+        const userId = req.user.id;
 
-        const [result] = await connection.execute(
-            "DELETE FROM users WHERE id = ?",
-            [userId]
-        );
+        const [result] = await connection.execute("DELETE FROM users WHERE id = ?", [userId]);
 
         if (!result.affectedRows) {
             return res.status(404).json({ msg: "User not found" });
@@ -81,12 +86,17 @@ router.delete("/removeUser", authMiddleware, async (req, res) => {
     }
 });
 
-
-
 // Get user by id
-router.get("/:id", async (req, res) => {
+router.get("/:id", authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
+
+        const isSelf = String(req.user.id) === String(id);
+        const isAdmin = req.user.type === "admin";
+
+        if (!isSelf && !isAdmin) {
+            return res.status(403).json({ msg: "Sem permissão" });
+        }
 
         const [result] = await connection.execute(
             "SELECT id, fullName, phone, email, type, created_at FROM users WHERE id = ?",

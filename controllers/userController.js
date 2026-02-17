@@ -13,13 +13,12 @@ async function postUserLoginController(req, res) {
 
         const user = await postUserLoginService(email, password);
 
-        if (user?.msg) {
-            const code =
-                user.msg === "User not found" ? 404 :
-                    user.msg === "Invalid Password" ? 401 :
-                        400;
+        if (user?.msg === "User not found" || user?.msg === "Invalid Password") {
+            return res.status(401).json({ msg: "Invalid email or password" });
+        }
 
-            return res.status(code).json(user);
+        if (user?.msg) {
+            return res.status(400).json(user);
         }
 
         return res.status(200).json(user);
@@ -41,13 +40,17 @@ async function postUserController(req, res) {
 
         const data = await postUserService(fullName, phone, email, password);
 
+        if (data?.msg === "User already exists") {
+            return res.status(409).json({ msg: "This email is already in use" });
+        }
+
         if (data?.msg) {
-            return res.status(409).json(data);
+            return res.status(400).json(data);
         }
 
         return res.status(201).json({
             id: data.insertId,
-            userName: fullName,
+            fullName,
             email,
             type: "normal",
         });
