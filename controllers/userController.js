@@ -1,15 +1,26 @@
+const { normalizeEmail } = require("../utils/normalize");
 const {
     postUserService,
     postUserLoginService,
     getAdminUsersService,
+    getNormalUsersService,
+    getUserByIdService,
 } = require("../services/userService");
-
-const { normalizeEmail } = require("../utils/normalize");
 
 
 async function getAdminUsersController(req, res) {
     try {
         const users = await getAdminUsersService();
+        return res.status(200).json(users);
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ msg: "Failed to load users" });
+    }
+}
+
+async function getNormalUsersController(req, res) {
+    try {
+        const users = await getNormalUsersService();
         return res.status(200).json(users);
     } catch (e) {
         console.error(e);
@@ -81,8 +92,27 @@ async function postUserController(req, res) {
     }
 }
 
+async function getUserByIdController(req, res) {
+    try {
+        const { id } = req.params;
+
+        const data = await getUserByIdService(id, req.user);
+
+        if (data?.msg) {
+            return res.status(data.status || 400).json({ msg: data.msg });
+        }
+
+        return res.status(200).json(data);
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ msg: "Failed to load user" });
+    }
+}
+
 module.exports = {
     postUserController,
     postUserLoginController,
     getAdminUsersController,
+    getNormalUsersController,
+    getUserByIdController,
 };

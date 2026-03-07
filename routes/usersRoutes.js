@@ -7,6 +7,8 @@ const {
     postUserController,
     postUserLoginController,
     getAdminUsersController,
+    getNormalUsersController,
+    getUserByIdController,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -15,17 +17,7 @@ const router = express.Router();
 router.get("/admin", authMiddleware, requireAdmin, getAdminUsersController);
 
 // Normal users list
-router.get("/", authMiddleware, requireAdmin, async (req, res) => {
-    try {
-        const [result] = await connection.execute(
-            "SELECT id, fullName, phone, email, created_at FROM users WHERE type = 'normal' ORDER BY id DESC"
-        );
-        return res.json(result);
-    } catch (e) {
-        console.error(e);
-        return res.status(500).json({ msg: "Failed to load users" });
-    }
-});
+router.get("/", authMiddleware, requireAdmin, getNormalUsersController);
 
 // Register
 router.post("/register", postUserController);
@@ -34,33 +26,7 @@ router.post("/register", postUserController);
 router.post("/login", postUserLoginController);
 
 // Update password
-router.put("/:id", authMiddleware, async (req, res) => {
-    try {
-        const { password } = req.body;
-        const { id } = req.params;
-
-        if (!password) return res.status(400).json({ msg: "password is required" });
-
-        const isSelf = String(req.user.id) === String(id);
-        const isAdmin = req.user.type === "admin";
-
-        if (!isSelf && !isAdmin) {
-            return res.status(403).json({ msg: "Sem permissão" });
-        }
-
-        const hashed = await bcryptjs.hash(String(password), 10);
-
-        const [result] = await connection.execute(
-            "UPDATE users SET password = ? WHERE id = ?",
-            [hashed, id]
-        );
-
-        return res.json({ affectedRows: result.affectedRows });
-    } catch (e) {
-        console.error(e);
-        return res.status(500).json({ msg: "Failed to update password" });
-    }
-});
+router.get("/:id", authMiddleware, getUserByIdController);
 
 // Delete own account (logado)
 router.delete("/removeUser", authMiddleware, async (req, res) => {

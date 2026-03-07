@@ -1,9 +1,20 @@
-const { findUserByEmail, createNewUser, findAllUsersAdmin } = require("../models/userModel");
 const bcryptjs = require("bcryptjs");
 const { generateToken } = require("../utils/jwt");
+const {
+    findUserByEmail,
+    createNewUser,
+    findAllUsersAdmin,
+    findAllNormalUsers,
+    findUserById,
+} = require("../models/userModel");
 
 async function getAdminUsersService() {
     const users = await findAllUsersAdmin();
+    return users;
+}
+
+async function getNormalUsersService() {
+    const users = await findAllNormalUsers();
     return users;
 }
 
@@ -42,9 +53,27 @@ async function postUserService(fullName, phone, email, password) {
     return result;
 }
 
+async function getUserByIdService(requestedId, loggedUser) {
+    const isSelf = String(loggedUser.id) === String(requestedId);
+    const isAdmin = loggedUser.type === "admin";
+
+    if (!isSelf && !isAdmin) {
+        return { msg: "Sem permissão", status: 403 };
+    }
+
+    const rows = await findUserById(requestedId);
+
+    if (!rows || rows.length === 0) {
+        return { msg: "cannot find", status: 404 };
+    }
+
+    return rows[0];
+}
 
 module.exports = {
     postUserService,
     postUserLoginService,
     getAdminUsersService,
+    getNormalUsersService,
+    getUserByIdService,
 };
