@@ -6,6 +6,7 @@ const {
     getNormalUsersService,
     getUserByIdService,
     removeOwnUserService,
+    adminUpdateUserPasswordService,
 } = require("../services/userService");
 
 
@@ -127,6 +128,25 @@ async function removeOwnUserController(req, res) {
     }
 }
 
+async function adminUpdateUserPasswordController(req, res) {
+    try {
+        const { id } = req.params;
+        const { password } = req.body;
+
+        const data = await adminUpdateUserPasswordService(id, password);
+
+        if (data?.msg && data.status) {
+            return res.status(data.status).json({ msg: data.msg });
+        }
+
+        return res.status(200).json(data);
+
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ msg: "Failed to update password" });
+    }
+}
+
 module.exports = {
     postUserController,
     postUserLoginController,
@@ -134,4 +154,5 @@ module.exports = {
     getNormalUsersController,
     getUserByIdController,
     removeOwnUserController,
+    adminUpdateUserPasswordController,
 };

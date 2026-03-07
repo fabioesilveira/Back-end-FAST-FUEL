@@ -7,6 +7,7 @@ const {
     findAllNormalUsers,
     findUserById,
     deleteUserById,
+    updateUserPassword,
 } = require("../models/userModel");
 
 async function getAdminUsersService() {
@@ -83,6 +84,26 @@ async function removeOwnUserService(userId) {
     };
 }
 
+async function adminUpdateUserPasswordService(userId, password) {
+
+    if (!password) {
+        return { msg: "Password is required", status: 400 };
+    }
+
+    const hashed = await bcryptjs.hash(String(password), 10);
+
+    const result = await updateUserPassword(userId, hashed);
+
+    if (!result.affectedRows) {
+        return { msg: "User not found", status: 404 };
+    }
+
+    return {
+        affectedRows: result.affectedRows,
+        msg: "Password updated",
+    };
+}
+
 module.exports = {
     postUserService,
     postUserLoginService,
@@ -90,4 +111,5 @@ module.exports = {
     getNormalUsersService,
     getUserByIdService,
     removeOwnUserService,
+    adminUpdateUserPasswordService,
 };

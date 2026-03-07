@@ -8,6 +8,7 @@ const {
     getNormalUsersController,
     getUserByIdController,
     removeOwnUserController,
+    adminUpdateUserPasswordController,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -29,5 +30,8 @@ router.get("/:id", authMiddleware, getUserByIdController);
 
 // Delete own account (logged user)
 router.delete("/removeUser", authMiddleware, removeOwnUserController);
+
+// Update Password (adminOnly)
+router.put("/:id/password", authMiddleware, requireAdmin, adminUpdateUserPasswordController);
 
 module.exports = router;

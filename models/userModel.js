@@ -55,6 +55,15 @@ async function deleteUserById(id) {
     return result;
 }
 
+async function updateUserPassword(id, passwordHash) {
+    const [result] = await connection.execute(
+        "UPDATE users SET password = ? WHERE id = ?",
+        [passwordHash, id]
+    );
+
+    return result;
+}
+
 
 module.exports = {
     findUserByEmail,
@@ -63,4 +72,5 @@ module.exports = {
     findAllNormalUsers,
     findUserById,
     deleteUserById,
+    updateUserPassword,
 };
