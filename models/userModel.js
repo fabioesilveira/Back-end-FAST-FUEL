@@ -22,7 +22,7 @@ async function findUserByEmail(email) {
         "SELECT * FROM users WHERE LOWER(email) = ? LIMIT 1",
         [e]
     );
-    return rows; // array
+    return rows; 
 }
 
 async function createNewUser(fullName, phone, email, passwordHash) {
@@ -46,6 +46,15 @@ async function findUserById(id) {
     return rows;
 }
 
+async function deleteUserById(id) {
+    const [result] = await connection.execute(
+        "DELETE FROM users WHERE id = ?",
+        [id]
+    );
+
+    return result;
+}
+
 
 module.exports = {
     findUserByEmail,
@@ -53,4 +62,5 @@ module.exports = {
     findAllUsersAdmin,
     findAllNormalUsers,
     findUserById,
+    deleteUserById,
 };

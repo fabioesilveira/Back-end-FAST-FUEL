@@ -6,6 +6,7 @@ const {
     findAllUsersAdmin,
     findAllNormalUsers,
     findUserById,
+    deleteUserById,
 } = require("../models/userModel");
 
 async function getAdminUsersService() {
@@ -33,14 +34,13 @@ async function postUserLoginService(email, password) {
         id: user.id,
         email: user.email,
         fullName: user.fullName,
-        type: user.type || "customer", // fallback
+        type: user.type || "normal",
     };
 
     const token = generateToken(payload);
 
     return { ...payload, token };
 }
-
 
 async function postUserService(fullName, phone, email, password) {
     const e = String(email || "").trim().toLowerCase();
@@ -58,16 +58,29 @@ async function getUserByIdService(requestedId, loggedUser) {
     const isAdmin = loggedUser.type === "admin";
 
     if (!isSelf && !isAdmin) {
-        return { msg: "Sem permissão", status: 403 };
+        return { msg: "Permission denied", status: 403 };
     }
 
     const rows = await findUserById(requestedId);
 
     if (!rows || rows.length === 0) {
-        return { msg: "cannot find", status: 404 };
+        return { msg: "User not found", status: 404 };
     }
 
     return rows[0];
+}
+
+async function removeOwnUserService(userId) {
+    const result = await deleteUserById(userId);
+
+    if (!result.affectedRows) {
+        return { msg: "User not found", status: 404 };
+    }
+
+    return {
+        affectedRows: result.affectedRows,
+        msg: "User deleted",
+    };
 }
 
 module.exports = {
@@ -76,4 +89,5 @@ module.exports = {
     getAdminUsersService,
     getNormalUsersService,
     getUserByIdService,
+    removeOwnUserService,
 };

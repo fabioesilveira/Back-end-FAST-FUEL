@@ -5,6 +5,7 @@ const {
     getAdminUsersService,
     getNormalUsersService,
     getUserByIdService,
+    removeOwnUserService,
 } = require("../services/userService");
 
 
@@ -109,10 +110,28 @@ async function getUserByIdController(req, res) {
     }
 }
 
+async function removeOwnUserController(req, res) {
+    try {
+        const userId = req.user.id;
+
+        const data = await removeOwnUserService(userId);
+
+        if (data?.msg === "User not found") {
+            return res.status(data.status || 404).json({ msg: data.msg });
+        }
+
+        return res.status(200).json(data);
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ msg: "Failed to remove user" });
+    }
+}
+
 module.exports = {
     postUserController,
     postUserLoginController,
     getAdminUsersController,
     getNormalUsersController,
     getUserByIdController,
+    removeOwnUserController,
 };
