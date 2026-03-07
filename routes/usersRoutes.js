@@ -3,22 +3,16 @@ const connection = require("../connection");
 const authMiddleware = require("../middlewares/authMiddleware");
 const requireAdmin = require("../middlewares/requireAdmin");
 const bcryptjs = require("bcryptjs");
-const { postUserController, postUserLoginController } = require("../controllers/userController");
+const {
+    postUserController,
+    postUserLoginController,
+    getAdminUsersController,
+} = require("../controllers/userController");
 
 const router = express.Router();
 
 // Admin list
-router.get("/admin", authMiddleware, requireAdmin, async (req, res) => {
-    try {
-        const [result] = await connection.execute(
-            "SELECT id, fullName, phone, email, type, created_at FROM users ORDER BY id DESC"
-        );
-        return res.json(result);
-    } catch (e) {
-        console.error(e);
-        return res.status(500).json({ msg: "Failed to load users" });
-    }
-});
+router.get("/admin", authMiddleware, requireAdmin, getAdminUsersController);
 
 // Normal users list
 router.get("/", authMiddleware, requireAdmin, async (req, res) => {

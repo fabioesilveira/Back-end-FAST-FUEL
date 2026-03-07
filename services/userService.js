@@ -1,6 +1,11 @@
-const { findUserByEmail, createNewUser } = require("../models/userModel");
+const { findUserByEmail, createNewUser, findAllUsersAdmin } = require("../models/userModel");
 const bcryptjs = require("bcryptjs");
 const { generateToken } = require("../utils/jwt");
+
+async function getAdminUsersService() {
+    const users = await findAllUsersAdmin();
+    return users;
+}
 
 async function postUserLoginService(email, password) {
     const e = String(email || "").trim().toLowerCase();
@@ -38,4 +43,8 @@ async function postUserService(fullName, phone, email, password) {
 }
 
 
-module.exports = { postUserService, postUserLoginService }
+module.exports = {
+    postUserService,
+    postUserLoginService,
+    getAdminUsersService,
+};

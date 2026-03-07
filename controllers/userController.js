@@ -1,5 +1,21 @@
-const { postUserService, postUserLoginService } = require("../services/userService");
+const {
+    postUserService,
+    postUserLoginService,
+    getAdminUsersService,
+} = require("../services/userService");
+
 const { normalizeEmail } = require("../utils/normalize");
+
+
+async function getAdminUsersController(req, res) {
+    try {
+        const users = await getAdminUsersService();
+        return res.status(200).json(users);
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ msg: "Failed to load users" });
+    }
+}
 
 async function postUserLoginController(req, res) {
     try {
@@ -65,4 +81,8 @@ async function postUserController(req, res) {
     }
 }
 
-module.exports = { postUserController, postUserLoginController };
+module.exports = {
+    postUserController,
+    postUserLoginController,
+    getAdminUsersController,
+};

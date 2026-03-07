@@ -1,5 +1,13 @@
 const connection = require("../connection");
 
+async function findAllUsersAdmin() {
+    const [rows] = await connection.execute(
+        "SELECT id, fullName, phone, email, type, created_at FROM users ORDER BY id DESC"
+    );
+
+    return rows;
+}
+
 async function findUserByEmail(email) {
     const e = String(email || "").trim().toLowerCase();
     const [rows] = await connection.execute(
@@ -22,4 +30,8 @@ async function createNewUser(fullName, phone, email, passwordHash) {
 }
 
 
-module.exports = { findUserByEmail, createNewUser }
+module.exports = {
+    findUserByEmail,
+    createNewUser,
+    findAllUsersAdmin,
+};
