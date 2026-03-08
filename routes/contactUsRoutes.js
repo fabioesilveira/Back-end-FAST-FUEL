@@ -1,48 +1,13 @@
 const express = require("express");
 const connection = require("../connection");
+const { getAllContactsController } = require("../controllers/contactUsController");
 
 const router = express.Router();
 
 /**
  * GET /contact-us?replied=0|1&email=...&order_code=ABC123
  */
-router.get("/", async (req, res) => {
-  try {
-    const { replied, email, order_code } = req.query;
-
-    let sql = `
-      SELECT 
-        id, name, email, order_code, phone, subject, message,
-        created_at, replied, replied_at
-      FROM contactUs
-      WHERE 1=1
-    `;
-    const params = [];
-
-    if (replied !== undefined) {
-      sql += " AND replied = ?";
-      params.push(Number(replied) ? 1 : 0);
-    }
-
-    if (email) {
-      sql += " AND email LIKE ?";
-      params.push(`%${email}%`);
-    }
-
-    if (order_code) {
-      sql += " AND order_code = ?";
-      params.push(String(order_code));
-    }
-
-    sql += " ORDER BY created_at DESC";
-
-    const [result] = await connection.execute(sql, params);
-    return res.json(result);
-  } catch (err) {
-    console.error("CONTACT-US GET ERROR:", err);
-    return res.status(500).json({ msg: "Internal server error" });
-  }
-});
+router.get("/", getAllContactsController);
 
 /**
  * GET /contact-us/:id
