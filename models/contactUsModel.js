@@ -34,6 +34,22 @@ async function findAllContacts(filters = {}) {
     return rows;
 }
 
+async function findContactById(id) {
+    const [rows] = await connection.execute(
+        `
+        SELECT 
+          id, name, email, order_code, phone, subject, message,
+          created_at, replied, replied_at
+        FROM contactUs
+        WHERE id = ?
+        `,
+        [id]
+    );
+
+    return rows;
+}
+
 module.exports = {
     findAllContacts,
+    findContactById,
 };

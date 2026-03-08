@@ -1,41 +1,18 @@
 const express = require("express");
 const connection = require("../connection");
-const { getAllContactsController } = require("../controllers/contactUsController");
 const { normalizeOrderCode } = require("../utils/normalizeOrderCode");
-
+const {
+    getAllContactsController,
+    getContactByIdController,
+} = require("../controllers/contactUsController");
 const router = express.Router();
 
-/** GET /contact-us? */
+
+/** GET /contact-us? **/
 router.get("/", getAllContactsController);
 
-/**
- * GET /contact-us/:id
- */
-router.get("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const [result] = await connection.execute(
-      `
-      SELECT 
-        id, name, email, order_code, phone, subject, message,
-        created_at, replied, replied_at
-      FROM contactUs
-      WHERE id = ?
-      `,
-      [id]
-    );
-
-    if (result.length === 0) {
-      return res.status(404).json({ msg: "Contact not found" });
-    }
-
-    return res.json(result[0]);
-  } catch (err) {
-    console.error("CONTACT-US GET/:id ERROR:", err);
-    return res.status(500).json({ msg: "Internal server error" });
-  }
-});
+/** GET /contact-us/:id **/
+router.get("/:id", getContactByIdController);
 
 
 /**
