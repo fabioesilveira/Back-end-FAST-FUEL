@@ -1,5 +1,6 @@
 const connection = require("../connection");
 
+
 async function findAllContacts(filters = {}) {
     const { replied, email, order_code } = filters;
 
@@ -33,6 +34,7 @@ async function findAllContacts(filters = {}) {
     const [rows] = await connection.execute(sql, params);
     return rows;
 }
+
 
 async function findContactById(id) {
     const [rows] = await connection.execute(
@@ -72,9 +74,25 @@ async function createContact(name, email, orderCode, phone, subject, message) {
     return result;
 }
 
+
+async function markContactAsReplied(id) {
+    const [result] = await connection.execute(
+        `
+        UPDATE contactUs
+        SET replied = 1,
+            replied_at = NOW()
+        WHERE id = ?
+        `,
+        [id]
+    );
+
+    return result;
+}
+
 module.exports = {
     findAllContacts,
     findContactById,
     findSaleByOrderCode,
     createContact,
+    markContactAsReplied,
 };

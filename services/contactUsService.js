@@ -3,6 +3,7 @@ const {
     findContactById,
     findSaleByOrderCode,
     createContact,
+    markContactAsReplied,
 } = require("../models/contactUsModel");
 
 const { normalizeOrderCode } = require("../utils/normalizeOrderCode");
@@ -63,8 +64,21 @@ async function createContactService(data) {
 }
 
 
+async function markContactAsRepliedService(id) {
+    const result = await markContactAsReplied(id);
+
+    if (!result.affectedRows) {
+        return { msg: "Message not found", status: 404 };
+    }
+
+    const rows = await findContactById(id);
+    return rows[0];
+}
+
+
 module.exports = {
     getAllContactsService,
     getContactByIdService,
     createContactService,
+    markContactAsRepliedService,
 };

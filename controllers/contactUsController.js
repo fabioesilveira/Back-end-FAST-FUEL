@@ -2,6 +2,7 @@ const {
     getAllContactsService,
     getContactByIdService,
     createContactService,
+    markContactAsRepliedService,
 } = require("../services/contactUsService");
 
 
@@ -50,8 +51,27 @@ async function createContactController(req, res) {
 }
 
 
+async function markContactAsRepliedController(req, res) {
+    try {
+        const { id } = req.params;
+
+        const data = await markContactAsRepliedService(id);
+
+        if (data?.msg) {
+            return res.status(data.status || 400).json({ msg: data.msg });
+        }
+
+        return res.status(200).json(data);
+    } catch (err) {
+        console.error("CONTACT-US PATCH reply ERROR:", err);
+        return res.status(500).json({ msg: "Internal server error" });
+    }
+}
+
+
 module.exports = {
     getAllContactsController,
     getContactByIdController,
     createContactController,
+    markContactAsRepliedController,
 };
