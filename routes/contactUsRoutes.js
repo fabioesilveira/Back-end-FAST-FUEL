@@ -1,12 +1,11 @@
 const express = require("express");
 const connection = require("../connection");
 const { getAllContactsController } = require("../controllers/contactUsController");
+const { normalizeOrderCode } = require("../utils/normalizeOrderCode");
 
 const router = express.Router();
 
-/**
- * GET /contact-us?replied=0|1&email=...&order_code=ABC123
- */
+/** GET /contact-us? */
 router.get("/", getAllContactsController);
 
 /**
@@ -38,25 +37,6 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-/**
- * helper: normaliza order_code
- * - aceita order_code ou orderNumber
- * - remove não dígitos
- * - só aceita 6 dígitos
- * - ignora "", null, undefined, "0"
- */
-function normalizeOrderCode({ order_code, orderNumber }) {
-  const raw =
-    (order_code != null ? String(order_code).trim() : "") ||
-    (orderNumber != null ? String(orderNumber).trim() : "");
-
-  if (!raw || raw === "0") return null;
-
-  const cleaned = raw.replace(/\D/g, "");
-  if (cleaned.length !== 6) return null;
-
-  return cleaned;
-}
 
 /**
  * POST /contact-us
@@ -65,7 +45,7 @@ function normalizeOrderCode({ order_code, orderNumber }) {
 router.post("/", async (req, res) => {
   try {
     const { name, email, phone, subject, message } = req.body;
-    const safeOrderCode = normalizeOrderCode(req.body); // ✅ aqui
+    const safeOrderCode = normalizeOrderCode(req.body); 
 
     if (!name || !email || !subject || !message) {
       return res.status(400).json({ msg: "name, email, subject, message are required" });
