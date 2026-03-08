@@ -49,7 +49,32 @@ async function findContactById(id) {
     return rows;
 }
 
+
+async function findSaleByOrderCode(orderCode) {
+    const [rows] = await connection.execute(
+        "SELECT 1 FROM sales WHERE order_code = ? LIMIT 1",
+        [orderCode]
+    );
+
+    return rows;
+}
+
+
+async function createContact(name, email, orderCode, phone, subject, message) {
+    const [result] = await connection.execute(
+        `
+        INSERT INTO contactUs (name, email, order_code, phone, subject, message)
+        VALUES (?, ?, ?, ?, ?, ?)
+        `,
+        [name, email, orderCode, phone, subject, message]
+    );
+
+    return result;
+}
+
 module.exports = {
     findAllContacts,
     findContactById,
+    findSaleByOrderCode,
+    createContact,
 };

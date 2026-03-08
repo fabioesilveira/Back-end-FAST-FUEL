@@ -1,6 +1,7 @@
 const {
     getAllContactsService,
     getContactByIdService,
+    createContactService,
 } = require("../services/contactUsService");
 
 
@@ -33,7 +34,24 @@ async function getContactByIdController(req, res) {
 }
 
 
+async function createContactController(req, res) {
+    try {
+        const data = await createContactService(req.body);
+
+        if (data?.msg) {
+            return res.status(data.status || 400).json({ msg: data.msg });
+        }
+
+        return res.status(201).json(data);
+    } catch (err) {
+        console.error("CONTACT-US POST ERROR:", err);
+        return res.status(500).json({ msg: "Internal server error" });
+    }
+}
+
+
 module.exports = {
     getAllContactsController,
     getContactByIdController,
+    createContactController,
 };
