@@ -1,18 +1,16 @@
 const express = require("express");
 const connection = require("../connection");
 const {
+  getAllProductsController,
   getProductIdController,
   getProductCategoryController,
 } = require("../controllers/productsController.js");
-const authMiddleware = require("../middlewares/authMiddleware.js");
 
 const router = express.Router();
 
 // GET all
-router.get("/", async (req, res) => {
-  const [result] = await connection.execute("SELECT * FROM products");
-  return res.json(result);
-});
+router.get("/", getAllProductsController);
+
 
 router.get("/category/:category", getProductCategoryController);
 

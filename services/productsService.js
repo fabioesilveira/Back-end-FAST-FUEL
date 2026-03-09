@@ -1,7 +1,15 @@
 const {
+  findAllProducts,
   getProductIdModel,
   getProductCategoryModel,
 } = require("../models/productsModel.js");
+
+
+
+async function getAllProductsService() {
+  const products = await findAllProducts();
+  return products;
+}
 
 async function getProductsIdService(id) {
   const result = await getProductIdModel(id);
@@ -30,6 +38,7 @@ async function getProductsCategoryService(category) {
 }
 
 module.exports = {
+  getAllProductsService,
   getProductsIdService,
   getProductsCategoryService,
 };

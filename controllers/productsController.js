@@ -1,7 +1,19 @@
 const {
+  getAllProductsService,
   getProductsIdService,
   getProductsCategoryService,
 } = require("../services/productsService");
+
+
+async function getAllProductsController(req, res) {
+  try {
+    const products = await getAllProductsService();
+    return res.status(200).json(products);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ msg: "Failed to load products" });
+  }
+}
 
 // GET /products/:id
 async function getProductIdController(req, res) {
@@ -40,6 +52,7 @@ async function getProductCategoryController(req, res) {
 }
 
 module.exports = {
+  getAllProductsController,
   getProductIdController,
   getProductCategoryController,
 };
