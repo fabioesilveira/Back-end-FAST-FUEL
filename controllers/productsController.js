@@ -25,8 +25,8 @@ async function getProductIdController(req, res) {
 
     const result = await getProductsIdService(id);
 
-    if (result.msg) {
-      return res.status(404).json(result);
+    if (result?.msg) {
+      return res.status(result.status || 400).json({ msg: result.msg });
     }
 
     return res.json(result);
@@ -43,8 +43,8 @@ async function getProductCategoryController(req, res) {
 
     const result = await getProductsCategoryService(category);
 
-    if (result.msg) {
-      return res.status(404).json(result);
+    if (result?.msg) {
+      return res.status(result.status || 400).json({ msg: result.msg });
     }
 
     return res.json(result);

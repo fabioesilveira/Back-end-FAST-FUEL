@@ -18,25 +18,20 @@ async function getProductsIdService(id) {
   const result = await getProductIdModel(id);
 
   if (result.length === 0) {
-    const err = new Error("Product not found");
-    err.statusCode = 404;
-    throw err;
+    return { msg: "Product not found", status: 404 };
   }
 
-  // retorna 1 produto (objeto)
   return result[0];
 }
+
 
 async function getProductsCategoryService(category) {
   const result = await getProductCategoryModel(category);
 
   if (result.length === 0) {
-    const err = new Error("No products found for this category");
-    err.statusCode = 404;
-    throw err;
+    return { msg: "No products found for this category", status: 404 };
   }
 
-  // retorna lista
   return result;
 }
 
