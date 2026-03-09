@@ -2,6 +2,7 @@ const {
   getAllProductsService,
   getProductsIdService,
   getProductsCategoryService,
+  createProductService,
 } = require("../services/productsService");
 
 
@@ -51,8 +52,26 @@ async function getProductCategoryController(req, res) {
   }
 }
 
+
+async function createProductController(req, res) {
+  try {
+    const data = await createProductService(req.body);
+
+    if (data?.msg) {
+      return res.status(data.status || 400).json({ msg: data.msg });
+    }
+
+    return res.status(201).json(data);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ msg: "Failed to create product" });
+  }
+}
+
+
 module.exports = {
   getAllProductsController,
   getProductIdController,
   getProductCategoryController,
+  createProductController,
 };

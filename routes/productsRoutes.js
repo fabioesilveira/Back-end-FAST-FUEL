@@ -4,6 +4,7 @@ const {
   getAllProductsController,
   getProductIdController,
   getProductCategoryController,
+  createProductController,
 } = require("../controllers/productsController.js");
 
 const router = express.Router();
@@ -11,37 +12,14 @@ const router = express.Router();
 // GET all
 router.get("/", getAllProductsController);
 
-
+// GET by category
 router.get("/category/:category", getProductCategoryController);
 
 // GET by id
 router.get("/:id", getProductIdController);
 
-
-router.post("/", async (req, res) => {
-  const { name, price, category, image, description } = req.body;
-
-  if (!name || price === undefined || !category || !image || !description) {
-    return res.status(400).json({
-      msg: "Missing fields. Required: name, price, category, image, description",
-    });
-  }
-
-  const [result] = await connection.execute(
-    `INSERT INTO products (name, price, category, image, description)
-     VALUES (?, ?, ?, ?, ?)`,
-    [name, price, category, image, description]
-  );
-
-  return res.status(201).json({
-    id: result.insertId,
-    name,
-    price,
-    category,
-    image,
-    description,
-  });
-});
+// POST
+router.post("/", createProductController);
 
 // PUT (price update)
 router.put("/:id", async (req, res) => {

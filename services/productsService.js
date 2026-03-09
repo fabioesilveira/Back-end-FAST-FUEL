@@ -2,6 +2,7 @@ const {
   findAllProducts,
   getProductIdModel,
   getProductCategoryModel,
+  createProduct,
 } = require("../models/productsModel.js");
 
 
@@ -37,7 +38,32 @@ async function getProductsCategoryService(category) {
   return result;
 }
 
+
+async function createProductService(data) {
+  const { name, price, category, image, description } = data;
+
+  if (!name || price === undefined || !category || !image || !description) {
+    return {
+      msg: "Missing fields. Required: name, price, category, image, description",
+      status: 400,
+    };
+  }
+
+  const result = await createProduct(name, price, category, image, description);
+
+  return {
+    id: result.insertId,
+    name,
+    price,
+    category,
+    image,
+    description,
+  };
+}
+
+
 module.exports = {
+  createProductService,
   getAllProductsService,
   getProductsIdService,
   getProductsCategoryService,

@@ -22,7 +22,18 @@ async function getProductCategoryModel(category) {
   return result;
 }
 
+async function createProduct(name, price, category, image, description) {
+  const [result] = await connection.execute(
+    `INSERT INTO products (name, price, category, image, description)
+     VALUES (?, ?, ?, ?, ?)`,
+    [name, price, category, image, description]
+  );
+
+  return result;
+}
+
 module.exports = {
+  createProduct,
   findAllProducts,
   getProductIdModel,
   getProductCategoryModel,
