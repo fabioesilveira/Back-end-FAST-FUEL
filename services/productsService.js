@@ -4,6 +4,7 @@ const {
   getProductCategoryModel,
   createProduct,
   updateProductPrice,
+  deleteProductById
 } = require("../models/productsModel.js");
 
 
@@ -76,10 +77,23 @@ async function updateProductPriceService(id, price) {
   return { msg: "updated", affectedRows: result.affectedRows };
 }
 
+async function removeProductService(id) {
+  const result = await deleteProductById(id);
+
+  if (!result.affectedRows) {
+    return { msg: "Product not found", status: 404 };
+  }
+
+  return { msg: "deleted", affectedRows: result.affectedRows };
+}
+
+
+
 module.exports = {
   createProductService,
   getAllProductsService,
   getProductsIdService,
   getProductsCategoryService,
   updateProductPriceService,
+  removeProductService
 };

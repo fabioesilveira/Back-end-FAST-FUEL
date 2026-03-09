@@ -4,6 +4,7 @@ const {
   getProductsCategoryService,
   createProductService,
   updateProductPriceService,
+  removeProductService
 } = require("../services/productsService");
 
 
@@ -87,11 +88,29 @@ async function updateProductPriceController(req, res) {
   }
 }
 
+async function removeProductController(req, res) {
+  try {
+    const { id } = req.params;
+
+    const data = await removeProductService(id);
+
+    if (data?.msg && data.status) {
+      return res.status(data.status).json({ msg: data.msg });
+    }
+
+    return res.status(200).json(data);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ msg: "Failed to delete product" });
+  }
+}
+
 
 module.exports = {
   getAllProductsController,
   getProductIdController,
   getProductCategoryController,
   createProductController,
-  updateProductPriceController
+  updateProductPriceController,
+  removeProductController
 };

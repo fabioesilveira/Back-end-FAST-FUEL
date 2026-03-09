@@ -5,7 +5,8 @@ const {
   getProductIdController,
   getProductCategoryController,
   createProductController,
-  updateProductPriceController
+  updateProductPriceController,
+  removeProductController,
 } = require("../controllers/productsController.js");
 
 const router = express.Router();
@@ -25,20 +26,7 @@ router.post("/", createProductController);
 // PUT (price update)
 router.put("/:id", updateProductPriceController);
 
-
-router.delete("/:id", async (req, res) => {
-  const { id } = req.params;
-
-  const [result] = await connection.execute(
-    `DELETE FROM products WHERE id = ?`,
-    [id]
-  );
-
-  if (result.affectedRows === 0) {
-    return res.status(404).json({ msg: "cannot find" });
-  }
-
-  return res.json({ msg: "deleted", affectedRows: result.affectedRows });
-});
+// DELETE
+router.delete("/:id", removeProductController);
 
 module.exports = router;

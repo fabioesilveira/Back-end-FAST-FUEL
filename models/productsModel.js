@@ -41,10 +41,20 @@ async function updateProductPrice(id, price) {
   return result;
 }
 
+async function deleteProductById(id) {
+  const [result] = await connection.execute(
+    `DELETE FROM products WHERE id = ?`,
+    [id]
+  );
+
+  return result;
+}
+
 module.exports = {
   createProduct,
   findAllProducts,
   getProductIdModel,
   getProductCategoryModel,
   updateProductPrice,
+  deleteProductById
 };
