@@ -5,6 +5,7 @@ const {
   getProductIdController,
   getProductCategoryController,
   createProductController,
+  updateProductPriceController
 } = require("../controllers/productsController.js");
 
 const router = express.Router();
@@ -22,25 +23,7 @@ router.get("/:id", getProductIdController);
 router.post("/", createProductController);
 
 // PUT (price update)
-router.put("/:id", async (req, res) => {
-  const { price } = req.body;
-  const { id } = req.params;
-
-  if (price === undefined) {
-    return res.status(400).json({ msg: "price is required" });
-  }
-
-  const [result] = await connection.execute(
-    `UPDATE products SET price = ? WHERE id = ?`,
-    [price, id]
-  );
-
-  if (result.affectedRows === 0) {
-    return res.status(404).json({ msg: "cannot find" });
-  }
-
-  return res.json({ msg: "updated", affectedRows: result.affectedRows });
-});
+router.put("/:id", updateProductPriceController);
 
 
 router.delete("/:id", async (req, res) => {

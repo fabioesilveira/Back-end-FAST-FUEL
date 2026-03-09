@@ -3,6 +3,7 @@ const {
   getProductsIdService,
   getProductsCategoryService,
   createProductService,
+  updateProductPriceService,
 } = require("../services/productsService");
 
 
@@ -68,10 +69,29 @@ async function createProductController(req, res) {
   }
 }
 
+async function updateProductPriceController(req, res) {
+  try {
+    const { id } = req.params;
+    const { price } = req.body;
+
+    const data = await updateProductPriceService(id, price);
+
+    if (data?.msg && data.status) {
+      return res.status(data.status).json({ msg: data.msg });
+    }
+
+    return res.status(200).json(data);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ msg: "Failed to update product" });
+  }
+}
+
 
 module.exports = {
   getAllProductsController,
   getProductIdController,
   getProductCategoryController,
   createProductController,
+  updateProductPriceController
 };

@@ -32,9 +32,19 @@ async function createProduct(name, price, category, image, description) {
   return result;
 }
 
+async function updateProductPrice(id, price) {
+  const [result] = await connection.execute(
+    `UPDATE products SET price = ? WHERE id = ?`,
+    [price, id]
+  );
+
+  return result;
+}
+
 module.exports = {
   createProduct,
   findAllProducts,
   getProductIdModel,
   getProductCategoryModel,
+  updateProductPrice,
 };

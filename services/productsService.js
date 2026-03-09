@@ -3,6 +3,7 @@ const {
   getProductIdModel,
   getProductCategoryModel,
   createProduct,
+  updateProductPrice,
 } = require("../models/productsModel.js");
 
 
@@ -61,10 +62,24 @@ async function createProductService(data) {
   };
 }
 
+async function updateProductPriceService(id, price) {
+  if (price === undefined) {
+    return { msg: "price is required", status: 400 };
+  }
+
+  const result = await updateProductPrice(id, price);
+
+  if (!result.affectedRows) {
+    return { msg: "Product not found", status: 404 };
+  }
+
+  return { msg: "updated", affectedRows: result.affectedRows };
+}
 
 module.exports = {
   createProductService,
   getAllProductsService,
   getProductsIdService,
   getProductsCategoryService,
+  updateProductPriceService,
 };
