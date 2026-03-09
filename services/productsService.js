@@ -1,9 +1,9 @@
 const {
   getProductIdModel,
   getProductCategoryModel,
-} = require("../models/productsModels.js");
+} = require("../models/productsModel.js");
 
-async function getProductIdServices(id) {
+async function getProductsIdService(id) {
   const result = await getProductIdModel(id);
 
   if (result.length === 0) {
@@ -16,7 +16,7 @@ async function getProductIdServices(id) {
   return result[0];
 }
 
-async function getProductCategoryServices(category) {
+async function getProductsCategoryService(category) {
   const result = await getProductCategoryModel(category);
 
   if (result.length === 0) {
@@ -30,6 +30,6 @@ async function getProductCategoryServices(category) {
 }
 
 module.exports = {
-  getProductIdServices,
-  getProductCategoryServices,
+  getProductsIdService,
+  getProductsCategoryService,
 };

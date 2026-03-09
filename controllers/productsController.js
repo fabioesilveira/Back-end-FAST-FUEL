@@ -1,14 +1,14 @@
 const {
-  getProductIdServices,
-  getProductCategoryServices,
-} = require("../services/productServices");
+  getProductsIdService,
+  getProductsCategoryService,
+} = require("../services/productsService");
 
 // GET /products/:id
 async function getProductIdController(req, res) {
   try {
     const { id } = req.params;
 
-    const result = await getProductIdServices(id);
+    const result = await getProductsIdService(id);
 
     if (result.msg) {
       return res.status(404).json(result);
@@ -26,7 +26,7 @@ async function getProductCategoryController(req, res) {
   try {
     const { category } = req.params;
 
-    const result = await getProductCategoryServices(category);
+    const result = await getProductsCategoryService(category);
 
     if (result.msg) {
       return res.status(404).json(result);

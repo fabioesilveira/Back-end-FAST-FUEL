@@ -3,7 +3,7 @@ const connection = require("../connection");
 const {
   getProductIdController,
   getProductCategoryController,
-} = require("../controllers/productsControllers.js");
+} = require("../controllers/productsController.js");
 const authMiddleware = require("../middlewares/authMiddleware.js");
 
 const router = express.Router();
