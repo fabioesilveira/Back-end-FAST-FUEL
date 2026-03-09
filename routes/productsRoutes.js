@@ -8,6 +8,9 @@ const {
   removeProductController,
 } = require("../controllers/productsController.js");
 
+const authMiddleware = require("../middlewares/authMiddleware");
+const requireAdmin = require("../middlewares/requireAdmin");
+
 const router = express.Router();
 
 // GET all
@@ -20,12 +23,12 @@ router.get("/category/:category", getProductCategoryController);
 router.get("/:id", getProductIdController);
 
 // POST
-router.post("/", createProductController);
+router.post("/", authMiddleware, requireAdmin, createProductController);
 
 // PUT (price update)
-router.put("/:id", updateProductPriceController);
+router.put("/:id", authMiddleware, requireAdmin, updateProductPriceController);
 
 // DELETE
-router.delete("/:id", removeProductController);
+router.delete("/:id", authMiddleware, requireAdmin, removeProductController);
 
 module.exports = router;
