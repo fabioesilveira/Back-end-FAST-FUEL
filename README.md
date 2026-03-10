@@ -2,16 +2,43 @@
 
 ## Description
 
-This repository contains the backend API for the **Fast Fuel** project, a fast-food ordering web application.
+This repository contains the backend API for **Fast Fuel**, a fast-food ordering web application.
 
 The API was built using **Node.js, Express, and MySQL**, and is responsible for handling product data, order creation, order tracking, and administrative order management.
 
-The backend communicates with the **Fast Fuel frontend application**, which provides the user interface where customers can browse the menu, place orders, and track their order status.
+The backend communicates with the **Fast Fuel frontend application**, which provides the user interface where customers can browse the menu, place orders, and track their order status in real time.
 
 This project follows a layered architecture based on **MVC and a service layer**, where routes, controllers, services, and models are separated to keep the code organized and maintainable.
 
 🔗 **Live Demo (Frontend):** https://fast-fuel-project-git-main-fabioesilveiras-projects.vercel.app/  
 📦 **Frontend Repo:** https://github.com/fabioesilveira/FAST-FUEL-PROJECT
+
+---
+
+## Tech Stack
+
+**Backend**
+
+- Node.js  
+- Express.js  
+
+**Database**
+
+- MySQL  
+
+**Authentication & Security**
+
+- JSON Web Tokens (JWT)  
+- bcrypt (password hashing)
+
+**Architecture**
+
+- MVC (Model–View–Controller)
+- Service Layer pattern
+
+**Deployment**
+
+- Railway
 
 ---
 
@@ -114,7 +141,7 @@ This structure makes the code easier to maintain and closer to real production b
 
 ## Deployment
 
-The Fast Fuel backend API is deployed on **Railway**, which provides cloud hosting for Node.js applications.
+The Fast Fuel backend API is deployed on **Railway**, where the Node.js server and environment variables are managed for the production environment.
 
 Railway was used to manage the server environment, environment variables, and database connection for the API.
 
