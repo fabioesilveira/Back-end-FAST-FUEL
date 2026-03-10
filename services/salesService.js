@@ -120,6 +120,59 @@ async function buildItemsSnapshot(itemsNorm) {
     });
 }
 
+async function updateSaleStatusService(id, newStatus) {
+    if (!newStatus) {
+        return { msg: "status is required", status: 400 };
+    }
+
+    if (!VALID_STATUS.has(newStatus)) {
+        return { msg: "Invalid status", status: 400 };
+    }
+
+    const [rows] = await connection.execute(
+        "SELECT status FROM sales WHERE id = ?",
+        [id]
+    );
+
+    if (!rows || rows.length === 0) {
+        return { msg: "Order not found", status: 404 };
+    }
+
+    const current = rows[0].status;
+
+    const allowed =
+        (current === "received" && newStatus === "in_progress") ||
+        (current === "in_progress" && newStatus === "sent");
+
+    if (!allowed) {
+        return {
+            msg: `Invalid transition: ${current} -> ${newStatus}`,
+            status: 400,
+        };
+    }
+
+    if (newStatus === "in_progress") {
+        await connection.execute(
+            `UPDATE sales
+       SET status = 'in_progress', accepted_at = NOW()
+       WHERE id = ?`,
+            [id]
+        );
+    }
+
+    if (newStatus === "sent") {
+        await connection.execute(
+            `UPDATE sales
+       SET status = 'sent', sent_at = NOW()
+       WHERE id = ?`,
+            [id]
+        );
+    }
+
+    return { ok: true };
+}
+
+
 
 async function getAllSalesService(query) {
     const { status, user_id, order_code, email } = query;
@@ -296,4 +349,5 @@ module.exports = {
     getSaleByIdService,
     quoteSalesService,
     createSaleService,
+    updateSaleStatusService,
 };
