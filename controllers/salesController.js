@@ -2,6 +2,7 @@ const {
     getAllSalesService,
     getSaleByIdService,
     quoteSalesService,
+    createSaleService,
 } = require("../services/salesService");
 
 async function getAllSalesController(req, res) {
@@ -54,8 +55,25 @@ async function quoteSalesController(req, res) {
     }
 }
 
+async function createSaleController(req, res) {
+    try {
+        const data = await createSaleService(req.body);
+
+        if (data?.msg) {
+            return res.status(data.status || 400).json({ msg: data.msg });
+        }
+
+        return res.status(201).json(data);
+    } catch (e) {
+        console.error(e);
+        const status = e.statusCode || 500;
+        return res.status(status).json({ msg: e.message || "Failed to create sale" });
+    }
+}
+
 module.exports = {
     getAllSalesController,
     getSaleByIdController,
     quoteSalesController,
+    createSaleController,
 };

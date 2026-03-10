@@ -5,57 +5,12 @@ const {
   getAllSalesController,
   getSaleByIdController,
   quoteSalesController,
+  createSaleController,
 } = require("../controllers/salesController");
-
-const {
-  genOrderCode,
-  genPaymentRef,
-  normalizeItems,
-} = require("../utils/sales");
 
 const router = express.Router();
 
 const VALID_STATUS = new Set(["received", "in_progress", "sent", "completed"]);
-
-// Payment simulation
-const VALID_PAYMENT_METHOD = new Set(["card", "apple_pay", "google_pay", "cash"]);
-
-
-// Rules Fees
-const TAX_RATE = 0.09;
-const DELIVERY_FEE = 9.99;
-const FREE_DELIVERY_THRESHOLD = 30.0;
-
-
-
-// (helper) busca produtos e monta snapshot (pra Orders page)
-async function buildItemsSnapshot(itemsNorm) {
-  if (!itemsNorm || itemsNorm.length === 0) return [];
-
-  const ids = [...new Set(itemsNorm.map((x) => x.id))];
-
-  const [rows] = await connection.execute(
-    `SELECT id, name, price, category, image
-     FROM products
-     WHERE id IN (${ids.map(() => "?").join(",")})`,
-    ids
-  );
-
-  const byId = new Map(rows.map((p) => [String(p.id), p]));
-
-  return itemsNorm.map((it) => {
-    const p = byId.get(String(it.id));
-    return {
-      id: String(it.id),
-      name: p?.name ?? "Item",
-      price: Number(p?.price ?? 0),
-      category: p?.category ?? null,
-      image: p?.image ?? null,
-      qty: it.qty,
-    };
-  });
-}
-
 
 // GET /sales
 router.get("/", getAllSalesController);
@@ -67,110 +22,7 @@ router.get("/:id", getSaleByIdController);
 router.post("/quote", quoteSalesController);
 
 // POST /sales
-router.post("/", async (req, res) => {
-  try {
-    const {
-      user_id = null,
-      customer_name = null,
-      customer_email = null,
-      items,
-      payment_method = "card",
-      delivery_address = null,
-    } = req.body;
-
-    if (!items) return res.status(400).json({ msg: "items is required" });
-
-    const itemsNorm = normalizeItems(items);
-    if (!itemsNorm) return res.status(400).json({ msg: "items must be an array" });
-    if (itemsNorm.length === 0) return res.status(400).json({ msg: "items cannot be empty" });
-
-    const breakdown = await calcTotalsFromDb(itemsNorm);
-
-    // snapshot com nome/preço/etc pra Orders page
-
-    const itemsSnapshot = await buildItemsSnapshot(itemsNorm);
-
-    // order_code único
-    let order_code = null;
-    for (let i = 0; i < 8; i++) {
-      const code = genOrderCode();
-      const [check] = await connection.execute(
-        "SELECT id FROM sales WHERE order_code = ? LIMIT 1",
-        [code]
-      );
-      if (check.length === 0) {
-        order_code = code;
-        break;
-      }
-    }
-    if (!order_code) return res.status(500).json({ msg: "Failed to generate order code" });
-
-    // salva o JSON normalizado (id + qty)
-    const itemsJson = JSON.stringify(itemsNorm);
-    const itemsSnapshotJson = JSON.stringify(itemsSnapshot);
-    const deliveryAddressJson = delivery_address ? JSON.stringify(delivery_address) : null;
-
-
-    // payment simulation
-    const payMethod = VALID_PAYMENT_METHOD.has(payment_method) ? payment_method : "card";
-    const payment_status = payMethod === "cash" ? "pending" : "approved";
-    const payment_ref = genPaymentRef();
-
-    const [result] = await connection.execute(
-      `INSERT INTO sales (
-    order_code, user_id, customer_name, customer_email, delivery_address,
-    payment_method, payment_status, payment_ref,
-    items, items_snapshot,
-    subtotal, discount, tax, delivery_fee, total,
-    tax_rate, delivery_fee_base, free_delivery_threshold,
-    status
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'received')`,
-      [
-        order_code,
-        user_id,
-        customer_name,
-        customer_email,
-        deliveryAddressJson,
-        payMethod,
-        payment_status,
-        payment_ref,
-        itemsJson,
-        itemsSnapshotJson,
-        breakdown.subtotal,
-        breakdown.discount,
-        breakdown.tax,
-        breakdown.delivery_fee,
-        breakdown.total,
-        TAX_RATE,
-        DELIVERY_FEE,
-        FREE_DELIVERY_THRESHOLD,
-      ]
-    );
-
-
-    return res.status(201).json({
-      id: result.insertId,
-      order_code,
-      status: "received",
-      delivery_address: delivery_address ?? null,
-      payment_method: payMethod,
-      payment_status,
-      payment_ref,
-      items: itemsNorm,
-      items_snapshot: itemsSnapshot,
-      ...breakdown,
-      rules: {
-        tax_rate: TAX_RATE,
-        delivery_fee: DELIVERY_FEE,
-        free_delivery_threshold: FREE_DELIVERY_THRESHOLD,
-      },
-    });
-  } catch (e) {
-    console.error(e);
-    const status = e.statusCode || 500;
-    return res.status(status).json({ msg: e.message || "Failed to create sale" });
-  }
-});
+router.post("/", createSaleController);
 
 /**
  * PATCH /sales/:id/status
