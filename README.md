@@ -151,9 +151,8 @@ This allows the backend to run in a production environment and be accessed by th
 
 ## Screenshots
 
-You can include screenshots of the application here.
-
-Example sections you might add:
+![Screenshot](/images/railway2.png)
+![Screenshot](/images/railway1.png)
 
 ### Menu / Products
 
