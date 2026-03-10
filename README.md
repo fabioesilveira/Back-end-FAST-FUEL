@@ -32,6 +32,8 @@ Each time the order status changes, the system records the corresponding timesta
 
 Administrators control the preparation and delivery stages while customers confirm when they receive their order.
 
+---
+
 ### Checkout Quote Simulation
 
 Before placing an order, the API can generate a **quote** for the selected cart items.
@@ -46,9 +48,13 @@ The system calculates:
 
 This simulates how checkout systems work in real food delivery applications.
 
+---
+
 ### Guest Checkout
 
 Orders can be created **without requiring authentication**, allowing users to place orders as guests. This mimics the quick checkout experience found in many modern delivery platforms.
+
+---
 
 ### Order Snapshot System
 
@@ -64,6 +70,8 @@ The snapshot stores information such as:
 
 This prevents future product updates from affecting past orders. For example, if a product price changes later, old orders will still show the original price.
 
+---
+
 ### Admin Order Management
 
 Administrators can manage incoming orders through protected routes.
@@ -76,6 +84,8 @@ Admins can:
 
 These routes are protected using middleware to ensure only authorized users can access them.
 
+---
+
 ### Authentication and Security
 
 The API includes user authentication using **JSON Web Tokens (JWT)**.
@@ -86,10 +96,11 @@ Once authenticated, users receive a JWT token that allows them to access protect
 
 This ensures that sensitive operations such as order management and product updates are only accessible to authorized users.
 
+---
+
 ### Clean Architecture (MVC + Service Layer)
 
 Instead of placing business logic directly inside routes, the project separates responsibilities across multiple layers.
-
 
 - **Routes** define API endpoints  
 - **Controllers** handle request and response logic  
@@ -98,6 +109,16 @@ Instead of placing business logic directly inside routes, the project separates 
 - **Utils** provide reusable helper functions  
 
 This structure makes the code easier to maintain and closer to real production backend architectures.
+
+---
+
+## Deployment
+
+The Fast Fuel backend API is deployed on **Railway**, which provides cloud hosting for Node.js applications.
+
+Railway was used to manage the server environment, environment variables, and database connection for the API.
+
+This allows the backend to run in a production environment and be accessed by the Fast Fuel frontend application.
 
 ---
 
