@@ -1,7 +1,7 @@
 // routes/sales.js
 const express = require("express");
 const connection = require("../connection");
-const { getAllSalesController } = require("../controllers/salesController");
+const { getAllSalesController, getSaleByIdController } = require("../controllers/salesController");
 
 const {
   genOrderCode,
@@ -136,19 +136,7 @@ async function buildItemsSnapshot(itemsNorm) {
 router.get("/", getAllSalesController);
 
 // GET /sales/:id
-router.get("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const [result] = await connection.execute("SELECT * FROM sales WHERE id = ?", [id]);
-
-    if (result.length === 0) return res.status(404).json({ msg: "cannot find" });
-    return res.json(parseSaleRow(result[0]));
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ msg: "Failed to load sale" });
-  }
-});
+router.get("/:id", getSaleByIdController);
 
 /**
  * POST /sales/quote

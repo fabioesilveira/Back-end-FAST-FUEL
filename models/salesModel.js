@@ -37,6 +37,17 @@ async function findAllSales(filters = {}) {
     return rows;
 }
 
+async function findSaleById(id) {
+    const [rows] = await connection.execute(
+        "SELECT * FROM sales WHERE id = ?",
+        [id]
+    );
+
+    return rows;
+}
+
+
 module.exports = {
-    findAllSales,
+  findAllSales,
+  findSaleById,
 };

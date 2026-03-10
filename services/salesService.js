@@ -1,4 +1,4 @@
-const { findAllSales } = require("../models/salesModel");
+const { findAllSales, findSaleById } = require("../models/salesModel");
 const { parseSaleRow } = require("../utils/sales");
 
 const VALID_STATUS = new Set(["received", "in_progress", "sent", "completed"]);
@@ -31,6 +31,18 @@ async function getAllSalesService(query) {
     return rows.map(parseSaleRow);
 }
 
+async function getSaleByIdService(id) {
+    const rows = await findSaleById(id);
+
+    if (!rows || rows.length === 0) {
+        return { msg: "Sale not found", status: 404 };
+    }
+
+    return parseSaleRow(rows[0]);
+}
+
+
 module.exports = {
     getAllSalesService,
+    getSaleByIdService,
 };
