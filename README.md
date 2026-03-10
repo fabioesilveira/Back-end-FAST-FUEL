@@ -2,11 +2,16 @@
 
 ## Description
 
-Fast Fuel is the backend API for a fast-food ordering application designed to simulate how a modern restaurant ordering system works. The goal of this project was to build a structured and scalable backend using **Node.js, Express, and MySQL**, while following a clean architecture pattern based on **MVC and a service layer**.
+This repository contains the backend API for the **Fast Fuel** project, a fast-food ordering web application.
 
-The API handles product management, order creation, order tracking, and administrative order processing. Customers can calculate their order totals, place an order, and confirm when their food has been received. On the restaurant side, administrators can view incoming orders and update their status as they move through preparation and delivery.
+The API was built using **Node.js, Express, and MySQL**, and is responsible for handling product data, order creation, order tracking, and administrative order management.
 
-This project was also a great opportunity to practice separating responsibilities across controllers, services, and models instead of placing all logic directly in routes.
+The backend communicates with the **Fast Fuel frontend application**, which provides the user interface where customers can browse the menu, place orders, and track their order status.
+
+This project follows a layered architecture based on **MVC and a service layer**, where routes, controllers, services, and models are separated to keep the code organized and maintainable.
+
+🔗 **Live Demo (Frontend):** https://fast-fuel-project-git-main-fabioesilveiras-projects.vercel.app/  
+📦 **Frontend Repo:** https://github.com/fabioesilveira/FAST-FUEL-PROJECT
 
 ---
 
@@ -18,11 +23,12 @@ Fast Fuel simulates a realistic order processing workflow. Customers can place o
 
 Orders move through a simple workflow that represents how a restaurant processes incoming orders.
 
-
 - **received** – the order has been created by the customer  
-- **in_progress** – the restaurant is preparing the order  
+- **in_progress** – the restaurant accepted the order and started preparing it  
 - **sent** – the order has been dispatched for delivery  
 - **completed** – the customer confirmed the order was received  
+
+Each time the order status changes, the system records the corresponding timestamp in the database (for example when the order is accepted, sent, or confirmed). This allows the system to track when each step of the order process happened.
 
 Administrators control the preparation and delivery stages while customers confirm when they receive their order.
 
@@ -80,11 +86,15 @@ These routes are protected using middleware to ensure only authorized users can 
 
 ---
 
-### Role-Based Authorization
+### Authentication and Security
 
-The API demonstrates simple role-based authorization.
+The API includes user authentication using **JSON Web Tokens (JWT)**.
 
-Some routes are public, while others require authentication and admin privileges.
+User passwords are securely stored using **bcrypt hashing**, which prevents raw passwords from being stored in the database.
+
+Once authenticated, users receive a JWT token that allows them to access protected routes. Certain routes are restricted to administrators using role-based middleware.
+
+This ensures that sensitive operations such as order management and product updates are only accessible to authorized users.
 
 ---
 
