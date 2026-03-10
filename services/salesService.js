@@ -343,6 +343,30 @@ async function createSaleService(payload) {
     };
 }
 
+async function confirmSaleReceivedService(id) {
+    const [rows] = await connection.execute(
+        "SELECT status FROM sales WHERE id = ?",
+        [id]
+    );
+
+    if (!rows || rows.length === 0) {
+        return { msg: "Order not found", status: 404 };
+    }
+
+    if (rows[0].status !== "sent") {
+        return { msg: "Order is not marked as sent yet", status: 400 };
+    }
+
+    await connection.execute(
+        `UPDATE sales
+     SET status = 'completed', received_confirmed_at = NOW()
+     WHERE id = ?`,
+        [id]
+    );
+
+    return { ok: true };
+}
+
 
 module.exports = {
     getAllSalesService,
@@ -350,4 +374,5 @@ module.exports = {
     quoteSalesService,
     createSaleService,
     updateSaleStatusService,
+    confirmSaleReceivedService,
 };

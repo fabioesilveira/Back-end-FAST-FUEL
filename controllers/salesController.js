@@ -4,6 +4,7 @@ const {
     quoteSalesService,
     createSaleService,
     updateSaleStatusService,
+    confirmSaleReceivedService,
 } = require("../services/salesService");
 
 async function getAllSalesController(req, res) {
@@ -90,10 +91,28 @@ async function updateSaleStatusController(req, res) {
     }
 }
 
+async function confirmSaleReceivedController(req, res) {
+    try {
+        const { id } = req.params;
+
+        const data = await confirmSaleReceivedService(id);
+
+        if (data?.msg) {
+            return res.status(data.status || 400).json({ msg: data.msg });
+        }
+
+        return res.status(200).json(data);
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ msg: "Failed to confirm received" });
+    }
+}
+
 module.exports = {
     getAllSalesController,
     getSaleByIdController,
     quoteSalesController,
     createSaleController,
     updateSaleStatusController,
+    confirmSaleReceivedController,
 };
