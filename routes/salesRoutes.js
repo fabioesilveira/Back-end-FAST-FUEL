@@ -7,14 +7,16 @@ const {
   updateSaleStatusController,
   confirmSaleReceivedController,
 } = require("../controllers/salesController");
+const authMiddleware = require("../middlewares/authMiddleware");
+const requireAdmin = require("../middlewares/requireAdmin");
 
 const router = express.Router();
 
 // GET /sales
-router.get("/", getAllSalesController);
+router.get("/", authMiddleware, requireAdmin, getAllSalesController);
 
 // GET /sales/:id
-router.get("/:id", getSaleByIdController);
+router.get("/:id", authMiddleware, requireAdmin, getSaleByIdController);
 
 /** POST /sales/quote */
 router.post("/quote", quoteSalesController);
@@ -22,10 +24,10 @@ router.post("/quote", quoteSalesController);
 // POST /sales
 router.post("/", createSaleController);
 
-/** PATCH /sales/ Admin muda status (received -> in_progress -> sent  */
-router.patch("/:id/status", updateSaleStatusController);
+/** PATCH /sales/:id/status - Admin updates order status */
+router.patch("/:id/status", authMiddleware, requireAdmin, updateSaleStatusController);
 
-/** PATCH /sales/:id/User confirma recebimento (sent -> completed) */
+/** PATCH /sales/:id/confirm-received - Customer confirms order received */
 router.patch("/:id/confirm-received", confirmSaleReceivedController);
 
 
