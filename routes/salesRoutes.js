@@ -1,14 +1,16 @@
 // routes/sales.js
 const express = require("express");
 const connection = require("../connection");
-const { getAllSalesController, getSaleByIdController } = require("../controllers/salesController");
+const {
+  getAllSalesController,
+  getSaleByIdController,
+  quoteSalesController,
+} = require("../controllers/salesController");
 
 const {
   genOrderCode,
   genPaymentRef,
-  round2,
   normalizeItems,
-  parseSaleRow,
 } = require("../utils/sales");
 
 const router = express.Router();
@@ -25,83 +27,6 @@ const DELIVERY_FEE = 9.99;
 const FREE_DELIVERY_THRESHOLD = 30.0;
 
 
-
-
-async function calcTotalsFromDb(itemsNorm) {
-  if (!itemsNorm || itemsNorm.length === 0) {
-    return {
-      subtotal: 0,
-      discount: 0,
-      tax: 0,
-      delivery_fee: 0,
-      total: 0,
-      sets: 0,
-      burgerCount: 0,
-      sideCount: 0,
-      beverageCount: 0,
-    };
-  }
-
-  const ids = [...new Set(itemsNorm.map((x) => x.id))];
-
-  const [rows] = await connection.execute(
-    `SELECT id, price, category
-     FROM products
-     WHERE id IN (${ids.map(() => "?").join(",")})`,
-    ids
-  );
-
-  const byId = new Map(rows.map((p) => [String(p.id), p]));
-
-  const missing = ids.filter((id) => !byId.has(String(id)));
-  if (missing.length) {
-    const err = new Error(`Missing products: ${missing.join(", ")}`);
-    err.statusCode = 400;
-    throw err;
-  }
-
-  let subtotal = 0;
-  let burgerCount = 0;
-  let sideCount = 0;
-  let beverageCount = 0;
-
-  for (const it of itemsNorm) {
-    const p = byId.get(String(it.id));
-    const price = Number(p.price || 0);
-    const qty = it.qty;
-
-    subtotal += price * qty;
-
-    const cat = String(p.category || "").toLowerCase();
-    if (cat === "sandwiches") burgerCount += qty;
-    else if (cat === "sides") sideCount += qty;
-    else if (cat === "beverages") beverageCount += qty;
-  }
-
-  subtotal = round2(subtotal);
-
-  const sets = Math.min(burgerCount, sideCount, beverageCount);
-  const discount = round2(sets * 2);
-
-  const taxableBase = Math.max(0, subtotal - discount);
-  const tax = round2(taxableBase * TAX_RATE);
-
-  const delivery_fee = taxableBase >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE;
-
-  const total = round2(taxableBase + tax + delivery_fee);
-
-  return {
-    subtotal,
-    discount,
-    tax,
-    delivery_fee: round2(delivery_fee),
-    total,
-    sets,
-    burgerCount,
-    sideCount,
-    beverageCount,
-  };
-}
 
 // (helper) busca produtos e monta snapshot (pra Orders page)
 async function buildItemsSnapshot(itemsNorm) {
@@ -138,35 +63,8 @@ router.get("/", getAllSalesController);
 // GET /sales/:id
 router.get("/:id", getSaleByIdController);
 
-/**
- * POST /sales/quote
- * retorna breakdown sem salvar
- */
-router.post("/quote", async (req, res) => {
-  try {
-    const { items } = req.body;
-    if (!items) return res.status(400).json({ msg: "items is required" });
-
-    const itemsNorm = normalizeItems(items);
-    if (!itemsNorm) return res.status(400).json({ msg: "items must be an array" });
-    if (itemsNorm.length === 0) return res.status(400).json({ msg: "items cannot be empty" });
-
-    const breakdown = await calcTotalsFromDb(itemsNorm);
-
-    return res.json({
-      ...breakdown,
-      rules: {
-        tax_rate: TAX_RATE,
-        delivery_fee: DELIVERY_FEE,
-        free_delivery_threshold: FREE_DELIVERY_THRESHOLD,
-      },
-    });
-  } catch (e) {
-    console.error(e);
-    const status = e.statusCode || 500;
-    return res.status(status).json({ msg: e.message || "Failed to quote totals" });
-  }
-});
+/** POST /sales/quote */
+router.post("/quote", quoteSalesController);
 
 // POST /sales
 router.post("/", async (req, res) => {
