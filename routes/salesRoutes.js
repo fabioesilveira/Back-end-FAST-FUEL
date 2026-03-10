@@ -1,8 +1,7 @@
 // routes/sales.js
 const express = require("express");
 const connection = require("../connection");
-
-const router = express.Router();
+const { getAllSalesController } = require("../controllers/salesController");
 
 const {
   genOrderCode,
@@ -12,6 +11,7 @@ const {
   parseSaleRow,
 } = require("../utils/sales");
 
+const router = express.Router();
 
 const VALID_STATUS = new Set(["received", "in_progress", "sent", "completed"]);
 
@@ -132,58 +132,8 @@ async function buildItemsSnapshot(itemsNorm) {
 }
 
 
-
 // GET /sales
-router.get("/", async (req, res) => {
-  try {
-    const { status, user_id, order_code, email } = req.query;
-
-    let sql = "SELECT * FROM sales WHERE 1=1";
-    const params = [];
-
-    if (status) {
-      const raw = String(status).trim();
-      const parts = raw.split(",").map((s) => s.trim()).filter(Boolean);
-
-      for (const s of parts) {
-        if (!VALID_STATUS.has(s)) {
-          return res.status(400).json({ msg: `Invalid status: ${s}` });
-        }
-      }
-
-      if (parts.length === 1) {
-        sql += " AND status = ?";
-        params.push(parts[0]);
-      } else {
-        sql += ` AND status IN (${parts.map(() => "?").join(",")})`;
-        params.push(...parts);
-      }
-    }
-
-    if (user_id) {
-      sql += " AND user_id = ?";
-      params.push(user_id);
-    }
-
-    if (order_code) {
-      sql += " AND order_code LIKE ?";
-      params.push(`%${String(order_code).trim()}%`);
-    }
-
-    if (email) {
-      sql += " AND customer_email LIKE ?";
-      params.push(`%${String(email).trim()}%`);
-    }
-
-    sql += " ORDER BY created_at DESC";
-
-    const [result] = await connection.execute(sql, params);
-    return res.json(result.map(parseSaleRow));
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ msg: "Failed to load sales" });
-  }
-});
+router.get("/", getAllSalesController);
 
 // GET /sales/:id
 router.get("/:id", async (req, res) => {
