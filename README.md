@@ -174,4 +174,40 @@ This allows the backend to run in a production environment and be accessed by th
 
 ### 1. Clone the repository
 
+```bash
+# 1) Clone the repo
+git clone https://github.com/fabioesilveira/Back-end-FAST-FUEL
 
+# 2) Navigate to project folder
+cd Back-end-FAST-FUEL
+
+# 3) Install dependencies
+npm install 
+```
+
+Create a .env file in the root of the project and add your database credentials.
+
+Example:
+
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=fast_fuel
+JWT_SECRET=your_secret_key
+
+```bash
+# 4) Start the development server
+
+npm run dev
+```
+
+The API will start running locally.
+
+Example:
+
+```bash
+http://localhost:3000
+```
+
+You can test the API using tools such as Postman, Insomnia, or Thunder Client.
