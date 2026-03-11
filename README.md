@@ -154,20 +154,6 @@ This allows the backend to run in a production environment and be accessed by th
 ![Screenshot](/images/railway2.png)
 ![Screenshot](/images/railway1.png)
 
-### Menu / Products
-
-
-### Creating an Order
-
-
-
-### Admin Order Dashboard
-
-
-
-### Order Status Tracking
-
-
 ---
 
 ## How to Run This Project
@@ -187,14 +173,14 @@ npm install
 
 Create a .env file in the root of the project and add your database credentials.
 
-Example:
+####Example:
 
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=fast_fuel
-JWT_SECRET=your_secret_key
+- DB_HOST=localhost
+- DB_PORT=3306
+- DB_USER=root
+- DB_PASSWORD=your_password
+- DB_NAME=fast_fuel
+- JWT_SECRET=your_secret_key
 
 ```bash
 # 4) Start the development server
