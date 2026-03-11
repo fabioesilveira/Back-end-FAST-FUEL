@@ -42,6 +42,25 @@ This project follows a layered architecture based on **MVC and a service layer**
 
 ---
 
+## Backend Architecture
+
+```mermaid
+flowchart TD
+
+A[Frontend React (Vite)] -->|HTTP Requests| B[Express API]
+
+B --> C[Routes]
+
+C --> D[Controllers]
+
+D --> E[Service Layer<br>Business Logic]
+
+E --> F[Models<br>Database Queries]
+
+F --> G[(MySQL Database)] 
+```
+---
+
 ## Features
 
 ### Order System
