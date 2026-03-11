@@ -4,7 +4,7 @@
 
 This repository contains the backend API for **Fast Fuel**, a fast-food ordering web application.
 
-The API was built using **Node.js, Express, and MySQL**, and is responsible for handling product data, order creation, order tracking, and administrative order management.
+The API was built using Node.js, Express, and MySQL, and is responsible for handling product data, order creation, order tracking, customer contact messages, and administrative order management.
 
 The backend communicates with the **Fast Fuel frontend application**, which provides the user interface where customers can browse the menu, place orders, and track their order status in real time.
 
@@ -110,6 +110,14 @@ Admins can:
 - update order status  
 
 These routes are protected using middleware to ensure only authorized users can access them.
+
+---
+
+### Contact Message System
+
+The API also includes a **Contact Us** feature that allows users to send messages directly to the restaurant.
+
+These messages are stored in the database and can be accessed by administrators through the admin dashboard, making it easier to manage customer questions, feedback, and support requests.
 
 ---
 

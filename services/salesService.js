@@ -1,4 +1,5 @@
 const { findAllSales, findSaleById } = require("../models/salesModel");
+
 const {
     parseSaleRow,
     normalizeItems,
@@ -6,15 +7,26 @@ const {
     genOrderCode,
     genPaymentRef,
 } = require("../utils/sales");
+
 const connection = require("../connection");
 
+// Status validos de um pedido
 const VALID_STATUS = new Set(["received", "in_progress", "sent", "completed"]);
+
+// Métodos de pagamento aceitos
 const VALID_PAYMENT_METHOD = new Set(["card", "apple_pay", "google_pay", "cash"]);
 
+// Regras de cálculo do pedido
 const TAX_RATE = 0.09;
 const DELIVERY_FEE = 9.99;
 const FREE_DELIVERY_THRESHOLD = 30.0;
 
+
+/**
+ * Calcula todos os valores do pedido com base nos produtos no banco.
+ * Busca preço e categoria de cada produto e calcula:
+ * subtotal, descontos de combos, imposto, taxa de entrega e total final.
+ */
 async function calcTotalsFromDb(itemsNorm) {
     if (!itemsNorm || itemsNorm.length === 0) {
         return {
@@ -34,8 +46,8 @@ async function calcTotalsFromDb(itemsNorm) {
 
     const [rows] = await connection.execute(
         `SELECT id, price, category
-     FROM products
-     WHERE id IN (${ids.map(() => "?").join(",")})`,
+         FROM products
+         WHERE id IN (${ids.map(() => "?").join(",")})`,
         ids
     );
 
@@ -92,7 +104,11 @@ async function calcTotalsFromDb(itemsNorm) {
 }
 
 
-// (helper) busca produtos e monta snapshot (pra Orders page)
+/**
+ * Cria um snapshot dos produtos no momento do pedido.
+ * Isso salva nome, preço, categoria e imagem para garantir
+ * que alteracoes futuras no produto não alterem pedidos antigos.
+ */
 async function buildItemsSnapshot(itemsNorm) {
     if (!itemsNorm || itemsNorm.length === 0) return [];
 
@@ -100,8 +116,8 @@ async function buildItemsSnapshot(itemsNorm) {
 
     const [rows] = await connection.execute(
         `SELECT id, name, price, category, image
-     FROM products
-     WHERE id IN (${ids.map(() => "?").join(",")})`,
+         FROM products
+         WHERE id IN (${ids.map(() => "?").join(",")})`,
         ids
     );
 
@@ -120,6 +136,13 @@ async function buildItemsSnapshot(itemsNorm) {
     });
 }
 
+
+/**
+ * Atualiza o status de um pedido.
+ * Controla a transição de estados do pedido:
+ * received, in_progress, sent
+ * Também registra timestamps no banco.
+ */
 async function updateSaleStatusService(id, newStatus) {
     if (!newStatus) {
         return { msg: "status is required", status: 400 };
@@ -154,8 +177,8 @@ async function updateSaleStatusService(id, newStatus) {
     if (newStatus === "in_progress") {
         await connection.execute(
             `UPDATE sales
-       SET status = 'in_progress', accepted_at = NOW()
-       WHERE id = ?`,
+             SET status = 'in_progress', accepted_at = NOW()
+             WHERE id = ?`,
             [id]
         );
     }
@@ -163,8 +186,8 @@ async function updateSaleStatusService(id, newStatus) {
     if (newStatus === "sent") {
         await connection.execute(
             `UPDATE sales
-       SET status = 'sent', sent_at = NOW()
-       WHERE id = ?`,
+             SET status = 'sent', sent_at = NOW()
+             WHERE id = ?`,
             [id]
         );
     }
@@ -173,7 +196,10 @@ async function updateSaleStatusService(id, newStatus) {
 }
 
 
-
+/**
+ * Retorna todas as vendas/pedidos com filtros opcionais.
+ * Permite filtrar por status, usuario, código do pedido ou email.
+ */
 async function getAllSalesService(query) {
     const { status, user_id, order_code, email } = query;
 
@@ -202,6 +228,11 @@ async function getAllSalesService(query) {
     return rows.map(parseSaleRow);
 }
 
+
+/**
+ * Busca um pedido especifico pelo ID.
+ * Retorna os dados do pedido formatados para a API.
+ */
 async function getSaleByIdService(id) {
     const rows = await findSaleById(id);
 
@@ -212,6 +243,11 @@ async function getSaleByIdService(id) {
     return parseSaleRow(rows[0]);
 }
 
+
+/**
+ * Simula o calculo de um pedido antes de cria-lo.
+ * Usado para mostrar ao usuario o valor final no checkout.
+ */
 async function quoteSalesService(items) {
     if (!items) {
         return { msg: "items is required", status: 400 };
@@ -239,6 +275,12 @@ async function quoteSalesService(items) {
     };
 }
 
+
+/**
+ * Cria um novo pedido no banco de dados.
+ * Calcula os valores, gera codigo do pedido, salva snapshot
+ * dos produtos e registra pagamento e status inicial.
+ */
 async function createSaleService(payload) {
     const {
         user_id = null,
@@ -295,13 +337,13 @@ async function createSaleService(payload) {
 
     const [result] = await connection.execute(
         `INSERT INTO sales (
-      order_code, user_id, customer_name, customer_email, delivery_address,
-      payment_method, payment_status, payment_ref,
-      items, items_snapshot,
-      subtotal, discount, tax, delivery_fee, total,
-      tax_rate, delivery_fee_base, free_delivery_threshold,
-      status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'received')`,
+            order_code, user_id, customer_name, customer_email, delivery_address,
+            payment_method, payment_status, payment_ref,
+            items, items_snapshot,
+            subtotal, discount, tax, delivery_fee, total,
+            tax_rate, delivery_fee_base, free_delivery_threshold,
+            status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'received')`,
         [
             order_code,
             user_id,
@@ -343,6 +385,11 @@ async function createSaleService(payload) {
     };
 }
 
+
+/**
+ * Permite que o cliente confirme que recebeu o pedido.
+ * Atualiza o status para "completed".
+ */
 async function confirmSaleReceivedService(id) {
     const [rows] = await connection.execute(
         "SELECT status FROM sales WHERE id = ?",
@@ -359,8 +406,8 @@ async function confirmSaleReceivedService(id) {
 
     await connection.execute(
         `UPDATE sales
-     SET status = 'completed', received_confirmed_at = NOW()
-     WHERE id = ?`,
+         SET status = 'completed', received_confirmed_at = NOW()
+         WHERE id = ?`,
         [id]
     );
 
