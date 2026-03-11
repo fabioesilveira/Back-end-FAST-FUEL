@@ -173,7 +173,7 @@ npm install
 
 Create a .env file in the root of the project and add your database credentials.
 
-###Example:
+#### Example:
 
 - DB_HOST=localhost
 - DB_PORT=3306
@@ -190,7 +190,7 @@ npm run dev
 
 The API will start running locally.
 
-Example:
+#### Example:
 
 ```bash
 http://localhost:3000
