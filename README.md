@@ -184,15 +184,30 @@ Below are some of the main endpoints provided by the Fast Fuel backend API.
 GET /products  
 Retrieve all available products.
 
+GET /products/category/:category  
+Retrieve products filtered by category.
+
 GET /products/:id  
 Retrieve details for a specific product.
 
-GET /products/category/:category  
-Retrieve products filtered by category.
+POST /products  
+Create a new product (admin only).
+
+PUT /products/:id  
+Update a product price (admin only).
+
+DELETE /products/:id  
+Remove a product (admin only).
 
 ---
 
 ### Orders
+
+GET /sales  
+Retrieve all orders (admin only).
+
+GET /sales/:id  
+Retrieve order details (admin only).
 
 POST /sales  
 Create a new order.
@@ -200,14 +215,52 @@ Create a new order.
 POST /sales/quote  
 Generate a price quote for cart items before checkout.
 
-GET /sales/:id  
-Retrieve order details.
-
 PATCH /sales/:id/status  
 Update order status (admin only).
 
 PATCH /sales/:id/confirm-received  
 Customer confirms order delivery.
+
+---
+
+### Users & Authentication
+
+POST /users/register  
+Create a new user account.
+
+POST /users/login  
+Authenticate a user and return a JWT token.
+
+GET /users/admin  
+Retrieve all users, including admins (admin only).
+
+GET /users  
+Retrieve all normal users (admin only).
+
+GET /users/:id  
+Retrieve details for a specific user.
+
+DELETE /users/removeUser  
+Delete the currently authenticated user account.
+
+PUT /users/:id/password  
+Update a user password (admin only).
+
+---
+
+### Contact Messages
+
+GET /contact-us  
+Retrieve all contact messages.
+
+GET /contact-us/:id  
+Retrieve a specific contact message.
+
+POST /contact-us  
+Create a new contact message.
+
+PATCH /contact-us/:id/reply  
+Mark a contact message as replied.
 
 ---
 
