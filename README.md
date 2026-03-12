@@ -31,6 +31,10 @@ The project follows a layered architecture based on **MVC and a Service Layer**,
 - JSON Web Tokens (JWT)  
 - bcrypt (password hashing)
 
+**Testing**
+
+- Jest (unit testing)
+
 **Architecture**
 
 - MVC (Model–View–Controller)
