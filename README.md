@@ -4,11 +4,11 @@
 
 This repository contains the backend API for **Fast Fuel**, a fast-food ordering web application.
 
-The API was built using Node.js, Express, and MySQL, and is responsible for handling product data, order creation, order tracking, customer contact messages, and administrative order management.
+The API was built using **Node.js, Express, and MySQL**, and is responsible for handling product data, order creation, order tracking, customer contact messages, and administrative order management.
 
 The backend communicates with the **Fast Fuel frontend application**, which provides the user interface where customers can browse the menu, place orders, and track their order status in real time.
 
-This project follows a layered architecture based on **MVC and a service layer**, where routes, controllers, services, and models are separated to keep the code organized and maintainable.
+The project follows a layered architecture based on **MVC and a Service Layer**, where routes, controllers, services, and models are separated to keep the code organized, scalable, and maintainable.
 
 🔗 **Live Demo (Frontend):** https://fast-fuel-project-git-main-fabioesilveiras-projects.vercel.app/  
 📦 **Frontend Repo:** https://github.com/fabioesilveira/FAST-FUEL-PROJECT
