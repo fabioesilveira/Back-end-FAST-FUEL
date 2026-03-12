@@ -170,7 +170,7 @@ This allows the backend to run in a production environment and be accessed by th
 
 ---
 
-## Screenshots
+## Screenshots - MySQL Database Schema (Railway)
 
 ![Screenshot](/images/railway2.png)
 ![Screenshot](/images/railway1.png)
