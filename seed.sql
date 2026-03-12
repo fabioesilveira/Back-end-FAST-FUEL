@@ -2,6 +2,8 @@ USE db_fastFuel;
 
 -- USERS
 
+-- USERS
+
 INSERT INTO
     users (
         fullName,
@@ -14,14 +16,14 @@ VALUES (
         'adm',
         '(11) 9999-8888',
         'fast-fuel@admin.com',
-        'adminFF',
+        '$2b$10$8TZnxyXSDJkt0Hm0LB43Nety45uWgDaCtP/SCnSLGvPOvQSHLg8j6',
         'admin'
     ),
     (
         'Jose M.',
         '(11) 4421-8888',
         'jose@email.com',
-        '123456',
+        '$2b$10$8TZnxyXSDJkt0Hm0LB43Nety45uWgDaCtP/SCnSLGvPOvQSHLg8j6',
         'normal'
     );
 

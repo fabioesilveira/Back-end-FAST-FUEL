@@ -342,3 +342,29 @@ http://localhost:3000
 ```
 
 You can test the API using tools such as Postman, Insomnia, or Thunder Client.
+
+---
+
+## API Testing Examples
+
+### Authentication – Admin Login (JWT)
+
+![Login API](images/api-login.png)
+
+---
+
+### Protected Admin Route – Retrieve Orders
+
+![Admin Orders](images/api-admin-orders.png)
+
+---
+
+### Create Order – Guest Checkout
+
+![Create Order](images/api-create-order.png)
+
+---
+
+### Order Quote Calculation
+
+![Quote Calculation](images/api-quote.png)
