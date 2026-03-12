@@ -2,8 +2,6 @@ USE db_fastFuel;
 
 -- USERS
 
--- USERS
-
 INSERT INTO
     users (
         fullName,

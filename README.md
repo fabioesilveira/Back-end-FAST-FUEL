@@ -368,3 +368,9 @@ You can test the API using tools such as Postman, Insomnia, or Thunder Client.
 ### Order Quote Calculation
 
 ![Quote Calculation](images/api-quote.png)
+
+---
+
+### Update Order Status (PATCH)
+
+![Update Status](images/api-patch-status.png)
