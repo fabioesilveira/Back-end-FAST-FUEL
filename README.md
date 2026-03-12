@@ -52,8 +52,19 @@ flowchart TD
     D --> E[Service Layer - Business Logic]
     E --> F[Models - Database Queries]
     F --> G[(MySQL Database)]
- ```   
+ ```
  ---
+
+ ## Testing
+
+The project includes unit tests using **Jest** to validate backend utilities and business logic.
+
+Run tests with:
+
+```bash
+npm test
+```
+---
 
 ## Features
 
@@ -157,8 +168,6 @@ Instead of placing business logic directly inside routes, the project separates 
 - **Utils** provide reusable helper functions  
 
 This structure makes the code easier to maintain and closer to real production backend architectures.
-
----
 
 ---
 
