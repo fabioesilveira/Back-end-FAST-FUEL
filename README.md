@@ -160,6 +160,64 @@ This structure makes the code easier to maintain and closer to real production b
 
 ---
 
+---
+
+## API Endpoints
+
+Below are some of the main endpoints provided by the Fast Fuel backend API.
+
+### Products
+
+GET /products  
+Retrieve all available products.
+
+GET /products/:id  
+Retrieve details for a specific product.
+
+GET /products/category/:category  
+Retrieve products filtered by category.
+
+---
+
+### Orders
+
+POST /sales  
+Create a new order.
+
+POST /sales/quote  
+Generate a price quote for cart items before checkout.
+
+GET /sales/:id  
+Retrieve order details.
+
+PATCH /sales/:id/status  
+Update order status (admin only).
+
+PATCH /sales/:id/confirm-received  
+Customer confirms order delivery.
+
+---
+
+### Authentication
+
+POST /users/register  
+Create a new user account.
+
+POST /users/login  
+Authenticate a user and return a JWT token.
+
+---
+
+### Contact Messages
+
+POST /contact  
+Send a message to the restaurant.
+
+GET /contact  
+Retrieve messages (admin only).
+
+---
+
 ## Deployment
 
 The Fast Fuel backend API is deployed on **Railway**, where the Node.js server and environment variables are managed for the production environment.
