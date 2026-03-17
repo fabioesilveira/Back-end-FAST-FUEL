@@ -7,7 +7,9 @@ const {
   trackSaleController,
   updateSaleStatusController,
   confirmSaleReceivedController,
+  getMyOrdersController
 } = require("../controllers/salesController");
+
 const authMiddleware = require("../middlewares/authMiddleware");
 const requireAdmin = require("../middlewares/requireAdmin");
 
@@ -27,6 +29,9 @@ router.post("/", createSaleController);
 
 // POST /sales /track
 router.post("/track", trackSaleController);
+
+// Get LoggedUser
+router.get("/my-orders", authMiddleware, getMyOrdersController);
 
 /** PATCH /sales/:id/status - Admin updates order status */
 router.patch("/:id/status", authMiddleware, requireAdmin, updateSaleStatusController);

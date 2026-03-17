@@ -110,6 +110,52 @@ const trackSaleController = async (req, res) => {
     }
 };
 
+const getMyOrdersController = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+
+        if (!userId) {
+            return res.status(401).json({ msg: "Unauthorized" });
+        }
+
+        const { status, order_code } = req.query;
+
+        let sql = `
+      SELECT *
+      FROM sales
+      WHERE user_id = ?
+    `;
+
+        const values = [userId];
+
+        if (status) {
+            const statuses = String(status)
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean);
+
+            if (statuses.length > 0) {
+                sql += ` AND status IN (${statuses.map(() => "?").join(",")})`;
+                values.push(...statuses);
+            }
+        }
+
+        if (order_code) {
+            sql += ` AND order_code = ?`;
+            values.push(String(order_code).trim());
+        }
+
+        sql += ` ORDER BY created_at DESC`;
+
+        const [rows] = await connection.promise().query(sql, values);
+
+        return res.status(200).json(rows);
+    } catch (error) {
+        console.error("getMyOrdersController error:", error);
+        return res.status(500).json({ msg: "Internal server error" });
+    }
+};
+
 async function updateSaleStatusController(req, res) {
     try {
         const { id } = req.params;
@@ -153,4 +199,5 @@ module.exports = {
     updateSaleStatusController,
     confirmSaleReceivedController,
     trackSaleController,
+    getMyOrdersController,
 };
