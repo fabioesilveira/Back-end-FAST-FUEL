@@ -79,7 +79,8 @@ const trackSaleController = async (req, res) => {
     try {
         console.log("TRACK BODY:", req.body);
 
-        const { order_code, email } = req.body;
+        const order_code = String(req.body?.order_code || "").trim();
+        const email = String(req.body?.email || "").trim().toLowerCase();
 
         if (!order_code || !email) {
             return res.status(400).json({
@@ -90,16 +91,14 @@ const trackSaleController = async (req, res) => {
         const sql = `
             SELECT *
             FROM sales
-            WHERE order_code = ? AND customer_email = ?
+            WHERE TRIM(order_code) = ?
+              AND LOWER(TRIM(customer_email)) = ?
             LIMIT 1
         `;
 
         console.log("TRACK QUERY:", order_code, email);
 
-        const [rows] = await connection.promise().query(sql, [
-            order_code,
-            email,
-        ]);
+        const [rows] = await connection.execute(sql, [order_code, email]);
 
         console.log("TRACK ROWS:", rows);
 
@@ -129,10 +128,10 @@ const getMyOrdersController = async (req, res) => {
         const { status, order_code } = req.query;
 
         let sql = `
-      SELECT *
-      FROM sales
-      WHERE user_id = ?
-    `;
+            SELECT *
+            FROM sales
+            WHERE user_id = ?
+        `;
 
         const values = [userId];
 
@@ -155,12 +154,12 @@ const getMyOrdersController = async (req, res) => {
 
         sql += ` ORDER BY created_at DESC`;
 
-        const [rows] = await connection.promise().query(sql, values);
+        const [rows] = await connection.execute(sql, values);
 
         return res.status(200).json(rows);
     } catch (error) {
         console.error("getMyOrdersController error:", error);
-        return res.status(500).json({ msg: "Internal server error" });
+        return res.status(500).json({ msg: error.message || "Internal server error" });
     }
 };
 
