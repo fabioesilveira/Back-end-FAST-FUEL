@@ -73,6 +73,43 @@ async function createSaleController(req, res) {
     }
 }
 
+const trackSaleController = async (req, res) => {
+    try {
+        const { order_code, email } = req.body;
+
+        if (!order_code || !email) {
+            return res.status(400).json({
+                msg: "order_code and email are required",
+            });
+        }
+
+        const sql = `
+      SELECT *
+      FROM sales
+      WHERE order_code = ? AND customer_email = ?
+      LIMIT 1
+    `;
+
+        const [rows] = await connection.promise().query(sql, [
+            order_code,
+            email,
+        ]);
+
+        if (!rows.length) {
+            return res.status(404).json({
+                msg: "Order not found",
+            });
+        }
+
+        return res.status(200).json(rows[0]);
+    } catch (error) {
+        console.error("trackSaleController error:", error);
+        return res.status(500).json({
+            msg: "Internal server error",
+        });
+    }
+};
+
 async function updateSaleStatusController(req, res) {
     try {
         const { id } = req.params;
@@ -115,4 +152,5 @@ module.exports = {
     createSaleController,
     updateSaleStatusController,
     confirmSaleReceivedController,
+    trackSaleController,
 };

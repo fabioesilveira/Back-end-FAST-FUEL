@@ -4,6 +4,7 @@ const {
   getSaleByIdController,
   quoteSalesController,
   createSaleController,
+  trackSaleController,
   updateSaleStatusController,
   confirmSaleReceivedController,
 } = require("../controllers/salesController");
@@ -18,11 +19,14 @@ router.get("/", authMiddleware, requireAdmin, getAllSalesController);
 // GET /sales/:id
 router.get("/:id", authMiddleware, requireAdmin, getSaleByIdController);
 
-/** POST /sales/quote */
+// POST /sales/quote */
 router.post("/quote", quoteSalesController);
 
-// POST /sales
+// POST /
 router.post("/", createSaleController);
+
+// POST /sales /track
+router.post("/track", trackSaleController);
 
 /** PATCH /sales/:id/status - Admin updates order status */
 router.patch("/:id/status", authMiddleware, requireAdmin, updateSaleStatusController);
