@@ -1,3 +1,5 @@
+const connection = require("../connection");
+
 const {
     getAllSalesService,
     getSaleByIdService,

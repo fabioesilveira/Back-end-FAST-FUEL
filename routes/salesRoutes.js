@@ -15,29 +15,20 @@ const requireAdmin = require("../middlewares/requireAdmin");
 
 const router = express.Router();
 
-// GET /sales
-router.get("/", authMiddleware, requireAdmin, getAllSalesController);
-
-// GET /sales/:id
-router.get("/:id", authMiddleware, requireAdmin, getSaleByIdController);
-
-// POST /sales/quote */
+// Public
 router.post("/quote", quoteSalesController);
-
-// POST /
 router.post("/", createSaleController);
-
-// POST /sales /track
 router.post("/track", trackSaleController);
 
-// Get LoggedUser
+// Logged user
 router.get("/my-orders", authMiddleware, getMyOrdersController);
 
-/** PATCH /sales/:id/status - Admin updates order status */
+// Admin only
+router.get("/", authMiddleware, requireAdmin, getAllSalesController);
+router.get("/:id", authMiddleware, requireAdmin, getSaleByIdController);
 router.patch("/:id/status", authMiddleware, requireAdmin, updateSaleStatusController);
 
-/** PATCH /sales/:id/confirm-received - Customer confirms order received */
+// Customer
 router.patch("/:id/confirm-received", confirmSaleReceivedController);
-
 
 module.exports = router;
