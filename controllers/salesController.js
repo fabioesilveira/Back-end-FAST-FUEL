@@ -77,6 +77,8 @@ async function createSaleController(req, res) {
 
 const trackSaleController = async (req, res) => {
     try {
+        console.log("TRACK BODY:", req.body);
+
         const { order_code, email } = req.body;
 
         if (!order_code || !email) {
@@ -86,16 +88,20 @@ const trackSaleController = async (req, res) => {
         }
 
         const sql = `
-      SELECT *
-      FROM sales
-      WHERE order_code = ? AND customer_email = ?
-      LIMIT 1
-    `;
+            SELECT *
+            FROM sales
+            WHERE order_code = ? AND customer_email = ?
+            LIMIT 1
+        `;
+
+        console.log("TRACK QUERY:", order_code, email);
 
         const [rows] = await connection.promise().query(sql, [
             order_code,
             email,
         ]);
+
+        console.log("TRACK ROWS:", rows);
 
         if (!rows.length) {
             return res.status(404).json({
@@ -107,7 +113,7 @@ const trackSaleController = async (req, res) => {
     } catch (error) {
         console.error("trackSaleController error:", error);
         return res.status(500).json({
-            msg: "Internal server error",
+            msg: error.message || "Internal server error",
         });
     }
 };
