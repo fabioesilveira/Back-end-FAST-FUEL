@@ -6,7 +6,7 @@ This repository contains the backend API for **Fast Fuel**, a fast-food ordering
 
 The API was built using **Node.js, Express, and MySQL**, and is responsible for handling product data, order creation, order tracking, customer contact messages, and administrative order management.
 
-The backend communicates with the **Fast Fuel frontend application**, which provides the user interface where customers can browse the menu, place orders, and track their order status in real time. The API also includes a product review system, allowing users to leave verified feedback on purchased items.
+The backend communicates with the **Fast Fuel frontend application**, which provides the user interface where customers can browse the menu, place orders, and track their order status in real time. The API also includes a **product review system**, allowing users to leave verified feedback on items they have purchased.
 
 The project follows a layered architecture based on **MVC and a Service Layer**, where routes, controllers, services, and models are separated to keep the code organized, scalable, and maintainable.
 
@@ -169,7 +169,7 @@ The system also calculates:
 - **Average rating per product**  
 - **Total number of reviews**
 
-This feature improves user trust and simulates real-world e-commerce feedback systems.
+This system mirrors real-world review workflows used in food delivery and e-commerce platforms, where feedback is tied to verified purchases.
 
 ---
 
@@ -301,26 +301,6 @@ Create a new contact message.
 
 PATCH /contact-us/:id/reply  
 Mark a contact message as replied.
-
----
-
-### Authentication
-
-POST /users/register  
-Create a new user account.
-
-POST /users/login  
-Authenticate a user and return a JWT token.
-
----
-
-### Contact Messages
-
-POST /contact  
-Send a message to the restaurant.
-
-GET /contact  
-Retrieve messages (admin only).
 
 ---
 
