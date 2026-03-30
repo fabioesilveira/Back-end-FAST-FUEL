@@ -2,16 +2,15 @@ const express = require("express");
 const {
     createReviewController,
     getReviewsByProductController,
+    getEligibleReviewsController,
 } = require("../controllers/reviewsController");
 
-const authMiddleware = require("../middlewares/authMiddleware");
+const optionalAuth = require("../middlewares/optionalAuth");
 
 const router = express.Router();
 
-// create review (logado ou guest)
-router.post("/", authMiddleware, createReviewController);
-
-// listar reviews por produto
+router.get("/eligible", optionalAuth, getEligibleReviewsController);
 router.get("/product/:productId", getReviewsByProductController);
+router.post("/", optionalAuth, createReviewController);
 
 module.exports = router;
