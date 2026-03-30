@@ -4,7 +4,9 @@ const {
     findReviewBySaleProduct,
     findReviewsByProduct,
     findReviewedProductIdsBySale,
+    findReviewsByCategory,
 } = require("../models/reviewsModel");
+
 
 function abbreviateName(name) {
     if (!name) return "Verified Guest";
@@ -203,8 +205,32 @@ async function getEligibleReviewsService(query, loggedUser = null) {
     };
 }
 
+async function getReviewsByCategoryService(category) {
+    const validCategories = new Set([
+        "sandwiches",
+        "sides",
+        "beverages",
+        "desserts",
+    ]);
+
+    const cat = String(category || "").trim().toLowerCase();
+
+    if (!validCategories.has(cat)) {
+        return { msg: "Invalid category", status: 400 };
+    }
+
+    const rows = await findReviewsByCategory(cat);
+
+    return {
+        category: cat,
+        reviews: rows,
+        count: rows.length,
+    };
+}
+
 module.exports = {
     createReviewService,
     getReviewsByProductService,
     getEligibleReviewsService,
+    getReviewsByCategoryService,
 };
