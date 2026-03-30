@@ -35,63 +35,54 @@ CREATE TABLE products (
 -- SALES
 
 CREATE TABLE sales (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-
-  order_code CHAR(6) NOT NULL UNIQUE,
-  user_id INT NULL,
-
-  customer_name VARCHAR(80) NULL,
-  customer_email VARCHAR(120) NULL,
-
-  delivery_address JSON NULL,
-
-  payment_method ENUM('card','apple_pay','google_pay','cash')
-    NOT NULL DEFAULT 'card',
-
-  payment_status ENUM('approved','pending','declined','refunded')
-    NOT NULL DEFAULT 'approved',
-
-  payment_ref VARCHAR(40) NULL,
-
-  items JSON NOT NULL,
-  items_snapshot JSON NOT NULL,
-
-  subtotal DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  discount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  tax DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  delivery_fee DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  total DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-
-  tax_rate DECIMAL(5,4) NOT NULL DEFAULT 0.0900,
-  delivery_fee_base DECIMAL(10,2) NOT NULL DEFAULT 9.99,
-  free_delivery_threshold DECIMAL(10,2) NOT NULL DEFAULT 30.00,
-
-  status ENUM('received','in_progress','sent','completed')
-    NOT NULL DEFAULT 'received',
-
-  accepted_at DATETIME NULL,
-  sent_at DATETIME NULL,
-  received_confirmed_at DATETIME NULL,
-
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-    ON UPDATE CURRENT_TIMESTAMP,
-
-  CONSTRAINT fk_sales_user
-    FOREIGN KEY (user_id) REFERENCES users(id)
-    ON DELETE SET NULL,
-
-  INDEX idx_sales_status (status),
-  INDEX idx_sales_user_status (user_id, status),
-  INDEX idx_sales_created (created_at),
-  INDEX idx_sales_order_code (order_code),
-  INDEX idx_sales_customer_email (customer_email),
-  INDEX idx_sales_payment_status (payment_status)
-
-) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_0900_ai_ci;
-
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_code CHAR(6) NOT NULL UNIQUE,
+    user_id INT NULL,
+    customer_name VARCHAR(80) NULL,
+    customer_email VARCHAR(120) NULL,
+    delivery_address JSON NULL,
+    payment_method ENUM(
+        'card',
+        'apple_pay',
+        'google_pay',
+        'cash'
+    ) NOT NULL DEFAULT 'card',
+    payment_status ENUM(
+        'approved',
+        'pending',
+        'declined',
+        'refunded'
+    ) NOT NULL DEFAULT 'approved',
+    payment_ref VARCHAR(40) NULL,
+    items JSON NOT NULL,
+    items_snapshot JSON NOT NULL,
+    subtotal DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    discount DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    tax DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    delivery_fee DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    total DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    tax_rate DECIMAL(5, 4) NOT NULL DEFAULT 0.0900,
+    delivery_fee_base DECIMAL(10, 2) NOT NULL DEFAULT 9.99,
+    free_delivery_threshold DECIMAL(10, 2) NOT NULL DEFAULT 30.00,
+    status ENUM(
+        'received',
+        'in_progress',
+        'sent',
+        'completed'
+    ) NOT NULL DEFAULT 'received',
+    accepted_at DATETIME NULL,
+    sent_at DATETIME NULL,
+    received_confirmed_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_sales_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL,
+    INDEX idx_sales_status (status),
+    INDEX idx_sales_user_status (user_id, status),
+    INDEX idx_sales_created (created_at),
+    INDEX idx_sales_order_code (order_code),
+    INDEX idx_sales_customer_email (customer_email),
+    INDEX idx_sales_payment_status (payment_status)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 -- CONTACT US
 CREATE TABLE contactUs (
@@ -110,3 +101,24 @@ CREATE TABLE contactUs (
     INDEX idx_contact_replied (replied),
     INDEX idx_contact_order (order_code)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
+-- REVIEWS
+CREATE TABLE product_reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sale_id INT NOT NULL,
+    product_id INT NOT NULL,
+    user_id INT NULL,
+    guest_email VARCHAR(120) NULL,
+    display_name VARCHAR(80) NOT NULL,
+    rating TINYINT NOT NULL,
+    comment VARCHAR(500) NULL,
+    verified_purchase TINYINT(1) NOT NULL DEFAULT 1,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_reviews_sale FOREIGN KEY (sale_id) REFERENCES sales (id) ON DELETE CASCADE,
+    CONSTRAINT fk_reviews_product FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE,
+    CONSTRAINT fk_reviews_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL,
+    UNIQUE KEY uniq_sale_product (sale_id, product_id),
+    INDEX idx_reviews_product (product_id),
+    INDEX idx_reviews_sale (sale_id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;

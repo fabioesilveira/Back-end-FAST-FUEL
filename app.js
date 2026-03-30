@@ -8,6 +8,7 @@ const usersRoutes = require("./routes/usersRoutes");
 const productsRoutes = require("./routes/productsRoutes");
 const salesRoutes = require("./routes/salesRoutes");
 const contactUsRoutes = require("./routes/contactUsRoutes");
+const reviewsRoutes = require("./routes/reviewsRoutes");
 
 const app = express();
 
@@ -32,5 +33,6 @@ app.use("/users", usersRoutes);
 app.use("/products", productsRoutes);
 app.use("/sales", salesRoutes);
 app.use("/contact-us", contactUsRoutes);
+app.use("/reviews", reviewsRoutes);
 
 module.exports = app;
