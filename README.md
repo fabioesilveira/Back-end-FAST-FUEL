@@ -6,7 +6,7 @@ This repository contains the backend API for **Fast Fuel**, a fast-food ordering
 
 The API was built using **Node.js, Express, and MySQL**, and is responsible for handling product data, order creation, order tracking, customer contact messages, and administrative order management.
 
-The backend communicates with the **Fast Fuel frontend application**, which provides the user interface where customers can browse the menu, place orders, and track their order status in real time.
+The backend communicates with the **Fast Fuel frontend application**, which provides the user interface where customers can browse the menu, place orders, and track their order status in real time. The API also includes a product review system, allowing users to leave verified feedback on purchased items.
 
 The project follows a layered architecture based on **MVC and a Service Layer**, where routes, controllers, services, and models are separated to keep the code organized, scalable, and maintainable.
 
@@ -149,6 +149,30 @@ These messages are stored in the database and can be accessed by administrators 
 
 ---
 
+### Product Reviews System
+
+The API includes a **Product Reviews system** that allows customers to leave feedback on individual items after completing an order.
+
+Reviews are directly linked to a specific order and product, ensuring that only users who actually purchased an item can review it.
+
+Key features:
+
+- **Verified purchase validation** – users can only review products included in their order  
+- **One review per product per order** – prevents duplicate reviews  
+- **Guest and authenticated support** – both logged users and guest users can leave reviews  
+- **Rating system (1 to 5 stars)** – required field for each review  
+- **Optional comment** – users can add feedback (up to 500 characters)  
+- **Display name formatting** – user names are abbreviated (e.g., *John D.*) for privacy  
+
+The system also calculates:
+
+- **Average rating per product**  
+- **Total number of reviews**
+
+This feature improves user trust and simulates real-world e-commerce feedback systems.
+
+---
+
 ### Authentication and Security
 
 The API includes user authentication using **JSON Web Tokens (JWT)**.
@@ -220,6 +244,22 @@ Update order status (admin only).
 
 PATCH /sales/:id/confirm-received  
 Customer confirms order delivery.
+
+---
+
+### Reviews
+
+GET /reviews/product/:productId  
+Retrieve all reviews for a specific product, including average rating and total count.
+
+GET /reviews/category/:category  
+Retrieve all reviews for a given product category (e.g., sandwiches, beverages).
+
+GET /reviews/eligible?sale_id=&customer_email=  
+Retrieve products eligible for review based on a completed order.
+
+POST /reviews  
+Create a new review for a product (requires a completed order).
 
 ---
 
