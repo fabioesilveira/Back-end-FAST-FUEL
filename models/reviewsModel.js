@@ -21,6 +21,30 @@ async function createReview(data) {
     return result;
 }
 
+async function findReviewBySaleProduct(sale_id, product_id) {
+    const [rows] = await connection.execute(
+        `SELECT id FROM product_reviews 
+     WHERE sale_id = ? AND product_id = ? LIMIT 1`,
+        [sale_id, product_id]
+    );
+
+    return rows;
+}
+
+async function findReviewsByProduct(product_id) {
+    const [rows] = await connection.execute(
+        `SELECT display_name, rating, comment, created_at
+     FROM product_reviews
+     WHERE product_id = ?
+     ORDER BY created_at DESC`,
+        [product_id]
+    );
+
+    return rows;
+}
+
 module.exports = {
     createReview,
+    findReviewBySaleProduct,
+    findReviewsByProduct,
 };

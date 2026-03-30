@@ -2,6 +2,7 @@ const connection = require("../connection");
 const {
     createReview,
     findReviewBySaleProduct,
+    findReviewsByProduct,
 } = require("../models/reviewsModel");
 
 function abbreviateName(name) {
@@ -89,6 +90,28 @@ async function createReviewService(payload, loggedUser = null) {
     };
 }
 
+async function getReviewsByProductService(product_id) {
+    const rows = await findReviewsByProduct(product_id);
+
+    if (!rows.length) {
+        return {
+            reviews: [],
+            average_rating: 0,
+            count: 0,
+        };
+    }
+
+    const avg =
+        rows.reduce((sum, r) => sum + r.rating, 0) / rows.length;
+
+    return {
+        reviews: rows,
+        average_rating: Number(avg.toFixed(2)),
+        count: rows.length,
+    };
+}
+
 module.exports = {
-  createReviewService,
+    createReviewService,
+    getReviewsByProductService,
 };
