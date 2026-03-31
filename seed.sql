@@ -1,5 +1,19 @@
 USE db_fastFuel;
 
+INSERT INTO users (
+    fullName,
+    phone,
+    email,
+    password,
+    type
+)
+VALUES (
+    'Admin Local',
+    '(11) 9999-0000',
+    'admin@fastfuel.com',
+    '$2b$10$Rm/3WTK9DZb3G/aAI8z8xOKSNu.RIfUnbe6frnfnuLDzK10rTm93O',
+    'admin'
+);
 -- USERS
 
 INSERT INTO
