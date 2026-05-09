@@ -78,7 +78,9 @@ async function findReviewsByCategory(category) {
     return rows;
 }
 
-async function findAllReviews() {
+async function findAllReviews(orderDirection = "DESC") {
+    const direction = orderDirection === "ASC" ? "ASC" : "DESC";
+
     const [rows] = await connection.execute(
         `SELECT
             pr.id,
@@ -92,7 +94,7 @@ async function findAllReviews() {
             pr.created_at
          FROM product_reviews pr
          INNER JOIN products p ON p.id = pr.product_id
-         ORDER BY pr.created_at DESC`
+         ORDER BY pr.created_at ${direction}`
     );
 
     return rows;

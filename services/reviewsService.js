@@ -8,7 +8,6 @@ const {
     findAllReviews,
 } = require("../models/reviewsModel");
 
-
 function abbreviateName(name) {
     if (!name) return "Verified Guest";
 
@@ -229,12 +228,16 @@ async function getReviewsByCategoryService(category) {
     };
 }
 
-async function getAllReviewsService() {
-    const rows = await findAllReviews();
+async function getAllReviewsService(query = {}) {
+    const sortValue = String(query.sort || "newest").toLowerCase();
+    const orderDirection = sortValue === "oldest" ? "ASC" : "DESC";
+
+    const rows = await findAllReviews(orderDirection);
 
     return {
         reviews: rows,
         count: rows.length,
+        sort: sortValue === "oldest" ? "oldest" : "newest",
     };
 }
 
