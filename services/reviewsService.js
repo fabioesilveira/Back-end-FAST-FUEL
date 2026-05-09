@@ -5,6 +5,7 @@ const {
     findReviewsByProduct,
     findReviewedProductIdsBySale,
     findReviewsByCategory,
+    findAllReviews,
 } = require("../models/reviewsModel");
 
 
@@ -228,9 +229,19 @@ async function getReviewsByCategoryService(category) {
     };
 }
 
+async function getAllReviewsService() {
+    const rows = await findAllReviews();
+
+    return {
+        reviews: rows,
+        count: rows.length,
+    };
+}
+
 module.exports = {
     createReviewService,
     getReviewsByProductService,
     getEligibleReviewsService,
     getReviewsByCategoryService,
+    getAllReviewsService
 };

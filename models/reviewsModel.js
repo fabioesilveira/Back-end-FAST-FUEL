@@ -78,10 +78,31 @@ async function findReviewsByCategory(category) {
     return rows;
 }
 
+async function findAllReviews() {
+    const [rows] = await connection.execute(
+        `SELECT
+            pr.id,
+            pr.product_id,
+            p.name AS product_name,
+            p.image AS product_image,
+            p.category,
+            pr.display_name,
+            pr.rating,
+            pr.comment,
+            pr.created_at
+         FROM product_reviews pr
+         INNER JOIN products p ON p.id = pr.product_id
+         ORDER BY pr.created_at DESC`
+    );
+
+    return rows;
+}
+
 module.exports = {
     createReview,
     findReviewBySaleProduct,
     findReviewsByProduct,
     findReviewedProductIdsBySale,
     findReviewsByCategory,
+    findAllReviews,
 };

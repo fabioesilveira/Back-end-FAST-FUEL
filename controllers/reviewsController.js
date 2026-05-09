@@ -3,6 +3,7 @@ const {
     getReviewsByProductService,
     getEligibleReviewsService,
     getReviewsByCategoryService,
+    getAllReviewsService,
 } = require("../services/reviewsService");
 
 async function createReviewController(req, res) {
@@ -94,9 +95,20 @@ async function getReviewsByCategoryController(req, res) {
     }
 }
 
+async function getAllReviewsController(req, res) {
+    try {
+        const data = await getAllReviewsService();
+        return res.status(200).json(data);
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ msg: "Failed to load reviews" });
+    }
+}
+
 module.exports = {
     createReviewController,
     getReviewsByProductController,
     getEligibleReviewsController,
     getReviewsByCategoryController,
+    getAllReviewsController
 };
