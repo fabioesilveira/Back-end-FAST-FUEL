@@ -50,11 +50,22 @@ async function deleteProductById(id) {
   return result;
 }
 
+async function getCategoryInsightsSalesRows() {
+  const [rows] = await connection.execute(
+    `SELECT items_snapshot
+     FROM sales
+     WHERE items_snapshot IS NOT NULL`
+  );
+
+  return rows;
+}
+
 module.exports = {
   createProduct,
   findAllProducts,
   getProductIdModel,
   getProductCategoryModel,
   updateProductPrice,
-  deleteProductById
+  deleteProductById,
+  getCategoryInsightsSalesRows,
 };

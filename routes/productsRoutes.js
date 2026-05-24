@@ -6,6 +6,7 @@ const {
   createProductController,
   updateProductPriceController,
   removeProductController,
+  getCategoryInsightsController
 } = require("../controllers/productsController.js");
 
 const authMiddleware = require("../middlewares/authMiddleware");
@@ -18,6 +19,8 @@ router.get("/", getAllProductsController);
 
 // GET by category
 router.get("/category/:category", getProductCategoryController);
+
+router.get("/category/:category/insights", getCategoryInsightsController);
 
 // GET by id
 router.get("/:id", getProductIdController);

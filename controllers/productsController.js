@@ -4,7 +4,8 @@ const {
   getProductsCategoryService,
   createProductService,
   updateProductPriceService,
-  removeProductService
+  removeProductService,
+  getCategoryInsightsService,
 } = require("../services/productsService");
 
 
@@ -105,6 +106,23 @@ async function removeProductController(req, res) {
   }
 }
 
+async function getCategoryInsightsController(req, res) {
+  try {
+    const { category } = req.params;
+
+    const result = await getCategoryInsightsService(category);
+
+    if (result?.status) {
+      return res.status(result.status).json({ msg: result.msg });
+    }
+
+    return res.json(result);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ msg: "Failed to load category insights" });
+  }
+}
+
 
 module.exports = {
   getAllProductsController,
@@ -112,5 +130,6 @@ module.exports = {
   getProductCategoryController,
   createProductController,
   updateProductPriceController,
-  removeProductController
+  removeProductController,
+  getCategoryInsightsController,
 };
