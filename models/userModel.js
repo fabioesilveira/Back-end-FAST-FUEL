@@ -1,5 +1,28 @@
 const connection = require("../connection");
 
+async function createNewUser(fullName, phone, email, passwordHash) {
+    const e = String(email || "").trim().toLowerCase();
+
+    const [result] = await connection.execute(
+        `INSERT INTO users (fullName, phone, email, password, type)
+         VALUES (?, ?, ?, ?, 'normal')`,
+        [fullName, phone, e, passwordHash]
+    );
+
+    return result;
+}
+
+async function findUserByEmail(email) {
+    const e = String(email || "").trim().toLowerCase();
+
+    const [rows] = await connection.execute(
+        "SELECT * FROM users WHERE LOWER(email) = ? LIMIT 1",
+        [e]
+    );
+
+    return rows;
+}
+
 async function findAllUsersAdmin() {
     const [rows] = await connection.execute(
         "SELECT id, fullName, phone, email, type, created_at FROM users ORDER BY id DESC"
@@ -11,36 +34,6 @@ async function findAllUsersAdmin() {
 async function findAllNormalUsers() {
     const [rows] = await connection.execute(
         "SELECT id, fullName, phone, email, created_at FROM users WHERE type = 'normal' ORDER BY id DESC"
-    );
-
-    return rows;
-}
-
-async function findUserByEmail(email) {
-    const e = String(email || "").trim().toLowerCase();
-    const [rows] = await connection.execute(
-        "SELECT * FROM users WHERE LOWER(email) = ? LIMIT 1",
-        [e]
-    );
-    return rows; 
-}
-
-async function createNewUser(fullName, phone, email, passwordHash) {
-    const e = String(email || "").trim().toLowerCase();
-
-    const [result] = await connection.execute(
-        `INSERT INTO users (fullName, phone, email, password, type)
-     VALUES (?, ?, ?, ?, 'normal')`,
-        [fullName, phone, e, passwordHash]
-    );
-
-    return result;
-}
-
-async function findUserById(id) {
-    const [rows] = await connection.execute(
-        "SELECT id, fullName, phone, email, type, created_at FROM users WHERE id = ?",
-        [id]
     );
 
     return rows;
@@ -64,13 +57,21 @@ async function updateUserPassword(id, passwordHash) {
     return result;
 }
 
+async function findUserById(id) {
+    const [rows] = await connection.execute(
+        "SELECT id, fullName, phone, email, type, created_at FROM users WHERE id = ?",
+        [id]
+    );
+
+    return rows;
+}
 
 module.exports = {
-    findUserByEmail,
     createNewUser,
+    findUserByEmail,
     findAllUsersAdmin,
     findAllNormalUsers,
-    findUserById,
     deleteUserById,
     updateUserPassword,
+    findUserById,
 };

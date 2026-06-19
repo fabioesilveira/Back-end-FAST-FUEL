@@ -1,5 +1,6 @@
 const bcryptjs = require("bcryptjs");
 const { generateToken } = require("../utils/jwt");
+
 const {
     findUserByEmail,
     createNewUser,
@@ -10,14 +11,16 @@ const {
     updateUserPassword,
 } = require("../models/userModel");
 
-async function getAdminUsersService() {
-    const users = await findAllUsersAdmin();
-    return users;
-}
+async function postUserService(fullName, phone, email, password) {
+    const e = String(email || "").trim().toLowerCase();
 
-async function getNormalUsersService() {
-    const users = await findAllNormalUsers();
-    return users;
+    const existing = await findUserByEmail(e);
+    if (existing.length > 0) return { msg: "User already exists" };
+
+    const hashedPassword = await bcryptjs.hash(password, 10);
+    const result = await createNewUser(fullName, phone, e, hashedPassword);
+
+    return result;
 }
 
 async function postUserLoginService(email, password) {
@@ -43,15 +46,46 @@ async function postUserLoginService(email, password) {
     return { ...payload, token };
 }
 
-async function postUserService(fullName, phone, email, password) {
-    const e = String(email || "").trim().toLowerCase();
+async function getAdminUsersService() {
+    const users = await findAllUsersAdmin();
+    return users;
+}
 
-    const existing = await findUserByEmail(e);
-    if (existing.length > 0) return { msg: "User already exists" };
+async function getNormalUsersService() {
+    const users = await findAllNormalUsers();
+    return users;
+}
 
-    const hashedPassword = await bcryptjs.hash(password, 10);
-    const result = await createNewUser(fullName, phone, e, hashedPassword);
-    return result;
+async function removeOwnUserService(userId) {
+    const result = await deleteUserById(userId);
+
+    if (!result.affectedRows) {
+        return { msg: "User not found", status: 404 };
+    }
+
+    return {
+        affectedRows: result.affectedRows,
+        msg: "User deleted",
+    };
+}
+
+async function adminUpdateUserPasswordService(userId, password) {
+    if (!password) {
+        return { msg: "Password is required", status: 400 };
+    }
+
+    const hashed = await bcryptjs.hash(String(password), 10);
+
+    const result = await updateUserPassword(userId, hashed);
+
+    if (!result.affectedRows) {
+        return { msg: "User not found", status: 404 };
+    }
+
+    return {
+        affectedRows: result.affectedRows,
+        msg: "Password updated",
+    };
 }
 
 async function getUserByIdService(requestedId, loggedUser) {
@@ -71,45 +105,12 @@ async function getUserByIdService(requestedId, loggedUser) {
     return rows[0];
 }
 
-async function removeOwnUserService(userId) {
-    const result = await deleteUserById(userId);
-
-    if (!result.affectedRows) {
-        return { msg: "User not found", status: 404 };
-    }
-
-    return {
-        affectedRows: result.affectedRows,
-        msg: "User deleted",
-    };
-}
-
-async function adminUpdateUserPasswordService(userId, password) {
-
-    if (!password) {
-        return { msg: "Password is required", status: 400 };
-    }
-
-    const hashed = await bcryptjs.hash(String(password), 10);
-
-    const result = await updateUserPassword(userId, hashed);
-
-    if (!result.affectedRows) {
-        return { msg: "User not found", status: 404 };
-    }
-
-    return {
-        affectedRows: result.affectedRows,
-        msg: "Password updated",
-    };
-}
-
 module.exports = {
     postUserService,
     postUserLoginService,
     getAdminUsersService,
     getNormalUsersService,
-    getUserByIdService,
     removeOwnUserService,
     adminUpdateUserPasswordService,
+    getUserByIdService,
 };

@@ -25,11 +25,11 @@ router.post("/register", postUserController);
 // Login
 router.post("/login", postUserLoginController);
 
-// Get user by id
-router.get("/:id", authMiddleware, getUserByIdController);
-
 // Delete own account (logged user)
 router.delete("/removeUser", authMiddleware, removeOwnUserController);
+
+// Get user by id
+router.get("/:id", authMiddleware, getUserByIdController);
 
 // Update Password (adminOnly)
 router.put("/:id/password", authMiddleware, requireAdmin, adminUpdateUserPasswordController);
