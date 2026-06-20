@@ -1,8 +1,26 @@
 const connection = require("../connection");
 
-
 async function findAllProducts() {
   const [rows] = await connection.execute("SELECT * FROM products");
+  return rows;
+}
+
+async function getProductCategoryModel(category) {
+  const [result] = await connection.execute(
+    "SELECT * FROM products WHERE category = ?",
+    [category]
+  );
+
+  return result;
+}
+
+async function getCategoryInsightsSalesRows() {
+  const [rows] = await connection.execute(
+    `SELECT items_snapshot
+     FROM sales
+     WHERE items_snapshot IS NOT NULL`
+  );
+
   return rows;
 }
 
@@ -11,14 +29,7 @@ async function getProductIdModel(id) {
     "SELECT * FROM products WHERE id = ?",
     [id]
   );
-  return result;
-}
 
-async function getProductCategoryModel(category) {
-  const [result] = await connection.execute(
-    "SELECT * FROM products WHERE category = ?",
-    [category]
-  );
   return result;
 }
 
@@ -50,22 +61,12 @@ async function deleteProductById(id) {
   return result;
 }
 
-async function getCategoryInsightsSalesRows() {
-  const [rows] = await connection.execute(
-    `SELECT items_snapshot
-     FROM sales
-     WHERE items_snapshot IS NOT NULL`
-  );
-
-  return rows;
-}
-
 module.exports = {
-  createProduct,
   findAllProducts,
-  getProductIdModel,
   getProductCategoryModel,
+  getCategoryInsightsSalesRows,
+  getProductIdModel,
+  createProduct,
   updateProductPrice,
   deleteProductById,
-  getCategoryInsightsSalesRows,
 };

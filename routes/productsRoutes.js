@@ -1,4 +1,5 @@
 const express = require("express");
+
 const {
   getAllProductsController,
   getProductIdController,
@@ -6,32 +7,37 @@ const {
   createProductController,
   updateProductPriceController,
   removeProductController,
-  getCategoryInsightsController
-} = require("../controllers/productsController.js");
+  getCategoryInsightsController,
+} = require("../controllers/productsController");
 
 const authMiddleware = require("../middlewares/authMiddleware");
 const requireAdmin = require("../middlewares/requireAdmin");
 
 const router = express.Router();
 
-// GET all
+// Public
+
+// GET all products
 router.get("/", getAllProductsController);
 
-// GET by category
+// GET category products
 router.get("/category/:category", getProductCategoryController);
 
+// GET category insights
 router.get("/category/:category/insights", getCategoryInsightsController);
 
-// GET by id
+// GET product by id
 router.get("/:id", getProductIdController);
 
-// POST
+// Admin only
+
+// Create product
 router.post("/", authMiddleware, requireAdmin, createProductController);
 
-// PUT (price update)
+// Update price
 router.put("/:id", authMiddleware, requireAdmin, updateProductPriceController);
 
-// DELETE
+// Delete product
 router.delete("/:id", authMiddleware, requireAdmin, removeProductController);
 
 module.exports = router;
