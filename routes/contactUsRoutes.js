@@ -1,4 +1,8 @@
 const express = require("express");
+
+const authMiddleware = require("../middlewares/authMiddleware");
+const requireAdmin = require("../middlewares/requireAdmin");
+
 const {
   getAllContactsController,
   getContactByIdController,
@@ -8,16 +12,12 @@ const {
 
 const router = express.Router();
 
-/** GET /contact-us? **/
-router.get("/", getAllContactsController);
-
-/** GET /contact-us/:id **/
-router.get("/:id", getContactByIdController);
-
-/** POST * body: { name, email, order_code? | orderNumber?, phone?, subject, message }*/
+// Public
 router.post("/", createContactController);
 
-/**  PATCH /contact-us/:id/reply **/
-router.patch("/:id/reply", markContactAsRepliedController);
+// Admin only
+router.get("/", authMiddleware, requireAdmin, getAllContactsController);
+router.patch("/:id/reply", authMiddleware, requireAdmin, markContactAsRepliedController);
+router.get("/:id", authMiddleware, requireAdmin, getContactByIdController);
 
 module.exports = router;

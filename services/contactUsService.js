@@ -8,28 +8,6 @@ const {
 
 const { normalizeOrderCode } = require("../utils/normalizeOrderCode");
 
-async function getAllContactsService(query) {
-    const filters = {
-        replied: query.replied,
-        email: query.email,
-        order_code: query.order_code,
-    };
-
-    const contacts = await findAllContacts(filters);
-    return contacts;
-}
-
-async function getContactByIdService(id) {
-    const rows = await findContactById(id);
-
-    if (!rows || rows.length === 0) {
-        return { msg: "Contact not found", status: 404 };
-    }
-
-    return rows[0];
-}
-
-
 async function createContactService(data) {
     const { name, email, phone, subject, message } = data;
 
@@ -63,6 +41,17 @@ async function createContactService(data) {
     return rows[0];
 }
 
+async function getAllContactsService(query) {
+    const filters = {
+        replied: query.replied,
+        email: query.email,
+        order_code: query.order_code,
+    };
+
+    const contacts = await findAllContacts(filters);
+
+    return contacts;
+}
 
 async function markContactAsRepliedService(id) {
     const result = await markContactAsReplied(id);
@@ -72,13 +61,23 @@ async function markContactAsRepliedService(id) {
     }
 
     const rows = await findContactById(id);
+
     return rows[0];
 }
 
+async function getContactByIdService(id) {
+    const rows = await findContactById(id);
+
+    if (!rows || rows.length === 0) {
+        return { msg: "Contact not found", status: 404 };
+    }
+
+    return rows[0];
+}
 
 module.exports = {
-    getAllContactsService,
-    getContactByIdService,
     createContactService,
+    getAllContactsService,
     markContactAsRepliedService,
+    getContactByIdService,
 };
