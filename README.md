@@ -39,6 +39,7 @@ The project follows a layered architecture based on **MVC and a Service Layer**,
 
 - MVC (Model–View–Controller)
 - Service Layer pattern
+- REST API Design
 
 **Deployment**
 
@@ -211,6 +212,9 @@ Retrieve all available products.
 GET /products/category/:category  
 Retrieve products filtered by category.
 
+GET /products/category/:category/insights  
+Retrieve category analytics, including product ratings, review counts, sales distribution, and random customer reviews.
+
 GET /products/:id  
 Retrieve details for a specific product.
 
@@ -223,6 +227,14 @@ Update a product price (admin only).
 DELETE /products/:id  
 Remove a product (admin only).
 
+Category insights include:
+
+- Average rating per product
+- Total number of reviews
+- Total units sold
+- Sales percentage distribution within the category
+- Random customer reviews
+
 ---
 
 ### Orders
@@ -231,23 +243,53 @@ GET /sales
 Retrieve all orders (admin only).
 
 GET /sales/:id  
-Retrieve order details (admin only).
+Retrieve details for a specific order (admin only).
+
+GET /sales/my-orders  
+Retrieve orders belonging to the authenticated user.
 
 POST /sales  
-Create a new order.
+Create a new order. Supports both guest checkout and authenticated users.
 
 POST /sales/quote  
-Generate a price quote for cart items before checkout.
+Generate a checkout quote before placing an order. Calculates subtotal, combo discounts, tax, delivery fee, and final total.
+
+POST /sales/track  
+Track an order using the order code and customer email.
 
 PATCH /sales/:id/status  
-Update order status (admin only).
+Update the order workflow (admin only).
+
+Supported status transitions:
+
+- received → in_progress
+- in_progress → sent
 
 PATCH /sales/:id/confirm-received  
-Customer confirms order delivery.
+Allow customers to confirm that an order was delivered, moving the order status to completed.
+
+Order workflow:
+
+- received
+- in_progress
+- sent
+- completed
+
+The API records timestamps for each stage of the order lifecycle, allowing order progress to be tracked over time.
 
 ---
 
 ### Reviews
+
+GET /reviews  
+Retrieve all product reviews. Supports sorting by newest or oldest using the `sort` query parameter.
+
+Example:
+
+```text
+GET /reviews?sort=newest
+GET /reviews?sort=oldest
+```
 
 GET /reviews/product/:productId  
 Retrieve all reviews for a specific product, including average rating and total count.
@@ -256,10 +298,19 @@ GET /reviews/category/:category
 Retrieve all reviews for a given product category (e.g., sandwiches, beverages).
 
 GET /reviews/eligible?sale_id=&customer_email=  
-Retrieve products eligible for review based on a completed order.
+Retrieve products eligible for review from a completed order. Supports both authenticated users and guest users.
 
 POST /reviews  
 Create a new review for a product (requires a completed order).
+
+Review system features:
+
+- Verified purchase validation
+- One review per product per order
+- Support for authenticated and guest users
+- Rating system (1–5 stars)
+- Optional comments (up to 500 characters)
+- Automatic display name abbreviation for privacy
 
 ---
 
@@ -272,35 +323,47 @@ POST /users/login
 Authenticate a user and return a JWT token.
 
 GET /users/admin  
-Retrieve all users, including admins (admin only).
+Retrieve all users, including administrators (admin only).
 
 GET /users  
 Retrieve all normal users (admin only).
 
 GET /users/:id  
-Retrieve details for a specific user.
+Retrieve details for a specific user. Users can access their own information, while administrators can access any user.
 
 DELETE /users/removeUser  
-Delete the currently authenticated user account.
+Delete the currently authenticated user's account.
 
 PUT /users/:id/password  
-Update a user password (admin only).
+Update a user's password (admin only).
+
+Authentication and security features:
+
+- JSON Web Token (JWT) authentication
+- Password hashing using bcrypt
+- Protected routes using middleware
+- Role-based authorization for administrators
+- Self-access restrictions for user information
 
 ---
 
 ### Contact Messages
 
 GET /contact-us  
-Retrieve all contact messages.
+Retrieve all contact messages (admin only).
 
 GET /contact-us/:id  
-Retrieve a specific contact message.
+Retrieve a specific contact message (admin only).
 
 POST /contact-us  
 Create a new contact message.
 
 PATCH /contact-us/:id/reply  
-Mark a contact message as replied.
+Mark a contact message as replied (admin only).
+
+The Contact Messages system allows customers to send questions, feedback, and support requests directly to the restaurant.
+
+Messages are stored in the database and can be managed by administrators through protected routes.
 
 ---
 
