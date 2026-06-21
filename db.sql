@@ -16,6 +16,7 @@ CREATE TABLE users (
 );
 
 -- PRODUCTS
+
 CREATE TABLE products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -85,6 +86,7 @@ CREATE TABLE sales (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 -- CONTACT US
+
 CREATE TABLE contactUs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -103,6 +105,7 @@ CREATE TABLE contactUs (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 -- REVIEWS
+
 CREATE TABLE product_reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
     sale_id INT NOT NULL,
