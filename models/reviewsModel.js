@@ -1,45 +1,9 @@
 const connection = require("../connection");
 
-async function createReview(data) {
-    const {
-        sale_id,
-        product_id,
-        user_id,
-        guest_email,
-        display_name,
-        rating,
-        comment,
-    } = data;
-
-    const [result] = await connection.execute(
-        `INSERT INTO product_reviews
-         (sale_id, product_id, user_id, guest_email, display_name, rating, comment)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [sale_id, product_id, user_id, guest_email, display_name, rating, comment]
-    );
-
-    return result;
-}
-
-async function findReviewBySaleProduct(sale_id, product_id) {
+async function findSaleByIdForReview(saleId) {
     const [rows] = await connection.execute(
-        `SELECT id
-         FROM product_reviews
-         WHERE sale_id = ? AND product_id = ?
-         LIMIT 1`,
-        [sale_id, product_id]
-    );
-
-    return rows;
-}
-
-async function findReviewsByProduct(product_id) {
-    const [rows] = await connection.execute(
-        `SELECT display_name, rating, comment, created_at
-         FROM product_reviews
-         WHERE product_id = ?
-         ORDER BY created_at DESC`,
-        [product_id]
+        "SELECT * FROM sales WHERE id = ?",
+        [saleId]
     );
 
     return rows;
@@ -78,6 +42,18 @@ async function findReviewsByCategory(category) {
     return rows;
 }
 
+async function findReviewsByProduct(product_id) {
+    const [rows] = await connection.execute(
+        `SELECT display_name, rating, comment, created_at
+         FROM product_reviews
+         WHERE product_id = ?
+         ORDER BY created_at DESC`,
+        [product_id]
+    );
+
+    return rows;
+}
+
 async function findAllReviews(orderDirection = "DESC") {
     const direction = orderDirection === "ASC" ? "ASC" : "DESC";
 
@@ -100,11 +76,45 @@ async function findAllReviews(orderDirection = "DESC") {
     return rows;
 }
 
+async function findReviewBySaleProduct(sale_id, product_id) {
+    const [rows] = await connection.execute(
+        `SELECT id
+         FROM product_reviews
+         WHERE sale_id = ? AND product_id = ?
+         LIMIT 1`,
+        [sale_id, product_id]
+    );
+
+    return rows;
+}
+
+async function createReview(data) {
+    const {
+        sale_id,
+        product_id,
+        user_id,
+        guest_email,
+        display_name,
+        rating,
+        comment,
+    } = data;
+
+    const [result] = await connection.execute(
+        `INSERT INTO product_reviews
+         (sale_id, product_id, user_id, guest_email, display_name, rating, comment)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [sale_id, product_id, user_id, guest_email, display_name, rating, comment]
+    );
+
+    return result;
+}
+
 module.exports = {
-    createReview,
-    findReviewBySaleProduct,
-    findReviewsByProduct,
+    findSaleByIdForReview,
     findReviewedProductIdsBySale,
     findReviewsByCategory,
+    findReviewsByProduct,
     findAllReviews,
+    findReviewBySaleProduct,
+    createReview,
 };

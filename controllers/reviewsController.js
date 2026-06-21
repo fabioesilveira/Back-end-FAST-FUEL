@@ -6,36 +6,6 @@ const {
     getAllReviewsService,
 } = require("../services/reviewsService");
 
-async function createReviewController(req, res) {
-    try {
-        const user = req.user || null;
-
-        const data = await createReviewService(req.body, user);
-
-        if (data?.msg && data.status) {
-            return res.status(data.status).json({ msg: data.msg });
-        }
-
-        return res.status(201).json(data);
-    } catch (e) {
-        console.error(e);
-        return res.status(500).json({ msg: "Failed to create review" });
-    }
-}
-
-async function getReviewsByProductController(req, res) {
-    try {
-        const { productId } = req.params;
-
-        const data = await getReviewsByProductService(productId);
-
-        return res.status(200).json(data);
-    } catch (e) {
-        console.error(e);
-        return res.status(500).json({ msg: "Failed to load reviews" });
-    }
-}
-
 async function getEligibleReviewsController(req, res) {
     try {
         const user = req.user || null;
@@ -70,6 +40,19 @@ async function getReviewsByCategoryController(req, res) {
     }
 }
 
+async function getReviewsByProductController(req, res) {
+    try {
+        const { productId } = req.params;
+
+        const data = await getReviewsByProductService(productId);
+
+        return res.status(200).json(data);
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ msg: "Failed to load reviews" });
+    }
+}
+
 async function getAllReviewsController(req, res) {
     try {
         const data = await getAllReviewsService(req.query);
@@ -81,10 +64,27 @@ async function getAllReviewsController(req, res) {
     }
 }
 
+async function createReviewController(req, res) {
+    try {
+        const user = req.user || null;
+
+        const data = await createReviewService(req.body, user);
+
+        if (data?.msg && data.status) {
+            return res.status(data.status).json({ msg: data.msg });
+        }
+
+        return res.status(201).json(data);
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ msg: "Failed to create review" });
+    }
+}
+
 module.exports = {
-    createReviewController,
-    getReviewsByProductController,
     getEligibleReviewsController,
     getReviewsByCategoryController,
+    getReviewsByProductController,
     getAllReviewsController,
+    createReviewController,
 };
