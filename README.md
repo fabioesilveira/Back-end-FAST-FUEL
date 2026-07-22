@@ -454,6 +454,24 @@ You can test the API using tools such as Postman, Insomnia, or Thunder Client.
 
 ---
 
+### Verified Review Eligibility — Purchase Validation
+
+![Purchase Validation](images/Eligible.png)
+
+---
+
+### Verified Review Creation — REST API
+
+![Review Creation](images/Review.png)
+
+---
+
+### Backend Automated Tests – Jest (19 Tests Passing)
+
+![Automated Tests](images/Jest.pngpng)
+
+---
+
 ### Update Order Status (PATCH)
 
 ![Update Status](images/api-patch-status.png)
