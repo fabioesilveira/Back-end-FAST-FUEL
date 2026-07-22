@@ -456,7 +456,7 @@ You can test the API using tools such as Postman, Insomnia, or Thunder Client.
 
 ### Verified Review Eligibility — Purchase Validation
 
-![Purchase Validation](images/Eligible.png)
+![Purchase Validation](images/Eligible1.png)
 
 ---
 
@@ -468,10 +468,4 @@ You can test the API using tools such as Postman, Insomnia, or Thunder Client.
 
 ### Backend Automated Tests – Jest (19 Tests Passing)
 
-![Automated Tests](images/Jest.pngpng)
-
----
-
-### Update Order Status (PATCH)
-
-![Update Status](images/api-patch-status.png)
+![Automated Tests](images/Jest.png)
