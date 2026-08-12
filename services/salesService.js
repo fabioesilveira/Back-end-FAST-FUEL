@@ -385,4 +385,5 @@ module.exports = {
     getSaleByIdService,
     updateSaleStatusService,
     confirmSaleReceivedService,
+    calcTotalsFromDb,
 };
