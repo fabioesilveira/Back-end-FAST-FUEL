@@ -31,6 +31,13 @@ The project follows a layered architecture based on **MVC and a Service Layer**,
 - JSON Web Tokens (JWT)  
 - bcrypt (password hashing)
 
+**Payments**
+
+- Stripe API
+- Stripe PaymentIntents
+- Stripe Payment Element
+- Stripe Sandbox / Test Mode
+
 **Testing**
 
 - Jest (unit testing)
@@ -51,12 +58,13 @@ The project follows a layered architecture based on **MVC and a Service Layer**,
 
 ```mermaid
 flowchart TD
-    A[Frontend React Vite] -->|HTTP Requests| B[Express API]
-    B --> C[Routes]
-    C --> D[Controllers]
-    D --> E[Service Layer - Business Logic]
-    E --> F[Models - Database Queries]
-    F --> G[(MySQL Database)]
+A[Frontend React Vite] -->|HTTP Requests| B[Express API]
+B --> C[Routes]
+C --> D[Controllers]
+D --> E[Service Layer - Business Logic]
+E --> F[Models - Database Queries]
+F --> G[(MySQL Database)]
+E --> H[Stripe API - PaymentIntents]
  ```
  ---
 
@@ -104,6 +112,49 @@ The system calculates:
 
 This simulates how checkout systems work in real food delivery applications.
 
+---
+
+### Stripe Payment Integration
+
+Fast Fuel integrates with **Stripe PaymentIntents** to simulate a real payment processing workflow using Stripe's sandbox environment.
+
+When a customer reaches checkout:
+
+- The frontend sends the selected cart items to the backend
+- The backend retrieves product prices from MySQL
+- The server calculates subtotal, combo discounts, tax, delivery fee, and final total
+- A Stripe PaymentIntent is created using the server-calculated amount
+- The frontend displays Stripe's secure Payment Element
+- The customer completes the payment using Stripe test payment methods
+- The backend retrieves the PaymentIntent from Stripe and verifies that the payment succeeded
+- The backend confirms that the Stripe payment amount matches the server-calculated order total
+- Only after successful verification is the order stored in MySQL
+
+The Stripe PaymentIntent ID is saved with the order as the payment reference.
+
+This prevents the frontend from deciding the amount charged or marking a payment as approved without server-side verification.
+
+The integration currently runs in **Stripe Sandbox / Test Mode**, so no real money is processed.
+
+#### Payment Flow
+
+```text
+Cart Items
+    ↓
+Fast Fuel Backend
+    ↓
+Server-side Price Calculation
+    ↓
+Stripe PaymentIntent
+    ↓
+Stripe Payment Element
+    ↓
+Payment Confirmation
+    ↓
+Backend Payment Verification
+    ↓
+MySQL Order Creation
+```
 ---
 
 ### Guest Checkout
@@ -235,6 +286,43 @@ Category insights include:
 - Sales percentage distribution within the category
 - Random customer reviews
 
+### Payments
+
+POST /payments/create-intent
+
+Create a Stripe PaymentIntent for the current cart.
+
+The frontend sends product IDs and quantities. The backend calculates the order total using product prices stored in MySQL before creating the PaymentIntent.
+
+Example request:
+
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "qty": 1
+    },
+    {
+      "id": 11,
+      "qty": 1
+    },
+    {
+      "id": 5,
+      "qty": 1
+    }
+  ]
+}
+```
+Example response:
+
+```json
+{
+  "clientSecret": "pi_..._secret_...",
+  "paymentIntentId": "pi_...",
+  "amount": 19.26
+}
+```
 ---
 
 ### Orders
@@ -369,11 +457,11 @@ Messages are stored in the database and can be managed by administrators through
 
 ## Deployment
 
-The Fast Fuel backend API is deployed on **Railway**, where the Node.js server and environment variables are managed for the production environment.
+The Fast Fuel backend API is deployed on **Railway**, where the Node.js server, MySQL database connection, JWT secret, and Stripe secret key are managed through environment variables.
 
-Railway was used to manage the server environment, environment variables, and database connection for the API.
+The deployed frontend communicates with the Railway API, while payment processing is handled through Stripe's sandbox environment.
 
-This allows the backend to run in a production environment and be accessed by the Fast Fuel frontend application.
+This allows the backend to run in a production environment while safely simulating real payment workflows without processing real money.
 
 ---
 
@@ -409,6 +497,13 @@ Create a .env file in the root of the project and add your database credentials.
 - DB_PASSWORD=your_password
 - DB_NAME=fast_fuel
 - JWT_SECRET=your_secret_key
+- STRIPE_SECRET_KEY=sk_test_your_stripe_test_key
+
+> The Stripe secret key must only be stored on the backend and should never be exposed in frontend code.
+
+The frontend uses a separate Stripe publishable key through:
+
+`VITE_STRIPE_PUBLISHABLE_KEY`
 
 ```bash
 # 4) Start the development server
