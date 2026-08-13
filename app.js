@@ -10,6 +10,7 @@ const salesRoutes = require("./routes/salesRoutes");
 const contactUsRoutes = require("./routes/contactUsRoutes");
 const reviewsRoutes = require("./routes/reviewsRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const emailRoutes = require("./routes/emailRoutes");
 
 const app = express();
 
@@ -27,6 +28,9 @@ app.use(
 
 //STRIPE
 app.use("/payments", paymentRoutes);
+
+//RESEND
+app.use("/emails", emailRoutes);
 
 // Endpoints base
 app.get("/", (req, res) => res.status(200).send("Fast Fuel API OK"));
