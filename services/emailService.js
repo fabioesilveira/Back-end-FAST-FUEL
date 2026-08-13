@@ -31,9 +31,9 @@ const buildAddressHtml = (address = {}) => {
 
 const imageStylesOrder = {
     "1": { width: "60px", height: "52px", marginTop: "3px" },
-    "2": { width: "90px", height: "77px", marginTop: "0px", translateX: "-5px",},
+    "2": { width: "90px", height: "77px", marginTop: "0px", offsetRight: "8px",},
     "3": { width: "65px", height: "55px", marginTop: "0px" },
-    "4": { width: "85px", height: "65px", marginTop: "-2px", translateX: "-5px", },
+    "4": { width: "85px", height: "65px", marginTop: "-2px", offsetRight: "8px", },
     "11": { width: "70px", height: "73px", marginTop: "0px" },
     "12": { width: "76px", height: "62px", marginTop: "0px" },
     "13": { width: "72px", height: "62px", marginTop: "4px" },
@@ -44,7 +44,7 @@ const imageStylesOrder = {
     "8": { width: "79px", height: "79px", marginTop: "0px" },
     "9": { width: "79px", height: "79px", marginTop: "0px" },
     "10": { width: "79px", height: "79px", marginTop: "0px" },
-    "15": { width: "104px", height: "88px", marginTop: "0px",translateX: "-5px",},
+    "15": { width: "104px", height: "88px", marginTop: "0px", offsetRight: "8px",},
     "16": { width: "86px", height: "80px", marginTop: "0px" },
     "17": { width: "73px", height: "79px", marginTop: "0px" },
     "18": { width: "60px", height: "51px", marginTop: "0px" },
@@ -66,7 +66,18 @@ const buildOrderItemsHtml = (items = []) => {
 
             return `
                 <tr>
-                    <td style="padding: 12px 0; vertical-align: top;">
+                    <td
+                        width="110"
+                        style="
+                            width: 110px;
+                            padding-top: 12px;
+                            padding-bottom: 12px;
+                            padding-left: ${imageStyle.paddingLeft || "0px"};
+                            vertical-align: top;
+                            text-align: center;
+                            padding-right: ${imageStyle.offsetRight || "0px"};
+                        "
+                    >
                         <img
                             src="${item.image}"
                             alt="${item.name}"
@@ -76,20 +87,11 @@ const buildOrderItemsHtml = (items = []) => {
                                 margin-top: ${imageStyle.marginTop};
                                 object-fit: contain;
                                 display: inline-block;
-                                transform: translateX(${imageStyle.translateX || "0px"});
                             "
                         />
                     </td>
 
-                    <td
-                        width="110"
-                        style="
-                            width: 110px;
-                            padding: 12px 0;
-                            vertical-align: top;
-                            text-align: center;
-                        "
-                    >
+                    <td style="padding: 12px 16px; vertical-align: top;">
                         <div
                             style="
                                 font-size: 15px;
