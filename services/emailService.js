@@ -31,9 +31,9 @@ const buildAddressHtml = (address = {}) => {
 
 const imageStylesOrder = {
     "1": { width: "60px", height: "52px", marginTop: "3px" },
-    "2": { width: "90px", height: "77px", marginTop: "0px", offsetRight: "8px",},
+    "2": { width: "90px", height: "77px", marginTop: "0px", offsetRight: "2px", },
     "3": { width: "65px", height: "55px", marginTop: "0px" },
-    "4": { width: "85px", height: "65px", marginTop: "-2px", offsetRight: "8px", },
+    "4": { width: "85px", height: "65px", marginTop: "-2px", offsetRight: "2px", },
     "11": { width: "70px", height: "73px", marginTop: "0px" },
     "12": { width: "76px", height: "62px", marginTop: "0px" },
     "13": { width: "72px", height: "62px", marginTop: "4px" },
@@ -44,7 +44,7 @@ const imageStylesOrder = {
     "8": { width: "79px", height: "79px", marginTop: "0px" },
     "9": { width: "79px", height: "79px", marginTop: "0px" },
     "10": { width: "79px", height: "79px", marginTop: "0px" },
-    "15": { width: "104px", height: "88px", marginTop: "0px", offsetRight: "8px",},
+    "15": { width: "104px", height: "88px", marginTop: "0px", offsetRight: "2px", },
     "16": { width: "86px", height: "80px", marginTop: "0px" },
     "17": { width: "73px", height: "79px", marginTop: "0px" },
     "18": { width: "60px", height: "51px", marginTop: "0px" },
@@ -315,6 +315,7 @@ const sendOrderConfirmationEmail = async ({
                             ${itemsHtml}
                         </table>
 
+
                         <table
                             width="100%"
                             cellpadding="0"
@@ -326,6 +327,19 @@ const sendOrderConfirmationEmail = async ({
                                 padding-top: 12px;
                             "
                         >
+                            <tr>
+                                <td
+                                    colspan="2"
+                                    height="18"
+                                    style="
+                                        height: 18px;
+                                        line-height: 18px;
+                                        font-size: 0;
+                                    "
+                                >
+                                    &nbsp;
+                                </td>
+                            </tr>
                             <tr>
                                 <td style="padding: 6px 0; color: #555;">Subtotal</td>
                                 <td align="right" style="padding: 6px 0; color: #555;">
