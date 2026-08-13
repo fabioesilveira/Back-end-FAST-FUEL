@@ -25,6 +25,7 @@ const {
     getPaymentIntent,
 } = require("./paymentService");
 
+const { sendOrderConfirmationEmail } = require("./emailService");
 
 const VALID_STATUS = new Set([
     "received",
@@ -544,55 +545,46 @@ async function createSaleService(payload) {
     };
 
 
-    const result =
-        await createSale(
-            saleData
-        );
+    const result = await createSale(saleData);
 
-
-    /*
-        Return created sale
-    */
-
-    return {
-        id:
-            result.insertId,
-
+    const createdSale = {
+        id: result.insertId,
         order_code,
-
-        status:
-            "received",
-
-        delivery_address:
-            delivery_address ?? null,
-
-        payment_method:
-            payMethod,
-
+        status: "received",
+        delivery_address: delivery_address ?? null,
+        payment_method: payMethod,
         payment_status,
-
-        payment_ref:
-            finalPaymentRef,
-
-        items:
-            itemsNorm,
-
-        items_snapshot:
-            itemsSnapshot,
-
+        payment_ref: finalPaymentRef,
+        items: itemsNorm,
+        items_snapshot: itemsSnapshot,
         ...breakdown,
-
         rules: {
-            tax_rate:
-                TAX_RATE,
-
-            delivery_fee:
-                DELIVERY_FEE,
-
-            free_delivery_threshold:
-                FREE_DELIVERY_THRESHOLD,
+            tax_rate: TAX_RATE,
+            delivery_fee: DELIVERY_FEE,
+            free_delivery_threshold: FREE_DELIVERY_THRESHOLD,
         },
     };
+
+    if (customer_email) {
+        try {
+            await sendOrderConfirmationEmail({
+                customerName: customer_name,
+                customerEmail: customer_email,
+                orderCode: order_code,
+                deliveryAddress: delivery_address,
+                items: itemsSnapshot,
+                subtotal: breakdown.subtotal,
+                discount: breakdown.discount,
+                tax: breakdown.tax,
+                deliveryFee: breakdown.delivery_fee,
+                total: breakdown.total,
+            });
+        } catch (emailError) {
+            console.error("Order confirmation email failed:", emailError);
+        }
+    }
+
+    return createdSale;
 }
 
 
