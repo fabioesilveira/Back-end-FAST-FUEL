@@ -31,22 +31,22 @@ const buildAddressHtml = (address = {}) => {
 
 const imageStylesOrder = {
     "1": { width: "60px", height: "52px", marginTop: "3px" },
-    "2": { width: "90px", height: "75px", marginTop: "0px" },
+    "2": { width: "90px", height: "77px", marginTop: "0px", marginRight: "8px" },
     "3": { width: "65px", height: "55px", marginTop: "0px" },
-    "4": { width: "85px", height: "65px", marginTop: "-2px" },
+    "4": { width: "85px", height: "65px", marginTop: "-2px", marginRight: "8px" },
     "11": { width: "70px", height: "73px", marginTop: "0px" },
-    "12": { width: "82px", height: "67px", marginTop: "0px" },
+    "12": { width: "79px", height: "65px", marginTop: "0px" },
     "13": { width: "75px", height: "65px", marginTop: "4px" },
-    "14": { width: "65px", height: "70px", marginTop: "0px" },
-    "5": { width: "77px", height: "77px", marginTop: "0px" },
-    "6": { width: "77px", height: "77px", marginTop: "0px" },
-    "7": { width: "77px", height: "77px", marginTop: "0px" },
-    "8": { width: "77px", height: "77px", marginTop: "0px" },
-    "9": { width: "77px", height: "77px", marginTop: "0px" },
-    "10": { width: "77px", height: "77px", marginTop: "0px" },
-    "15": { width: "200px", height: "81px", marginTop: "0px" },
-    "16": { width: "82px", height: "73px", marginTop: "0px" },
-    "17": { width: "75px", height: "79px", marginTop: "0px" },
+    "14": { width: "63px", height: "68px", marginTop: "0px" },
+    "5": { width: "79px", height: "79px", marginTop: "0px" },
+    "6": { width: "79px", height: "79px", marginTop: "0px" },
+    "7": { width: "79px", height: "79px", marginTop: "0px" },
+    "8": { width: "79px", height: "79px", marginTop: "0px" },
+    "9": { width: "79px", height: "79px", marginTop: "0px" },
+    "10": { width: "79px", height: "79px", marginTop: "0px" },
+    "15": { width: "100px", height: "84px", marginTop: "0px", marginRight: "19px"  },
+    "16": { width: "82px", height: "77px", marginTop: "0px" },
+    "17": { width: "73px", height: "79px", marginTop: "0px" },
     "18": { width: "60px", height: "51px", marginTop: "0px" },
 };
 
@@ -310,7 +310,7 @@ const sendOrderConfirmationEmail = async ({
                             cellspacing="0"
                             style="
                                 border-collapse: collapse;
-                                margin-top: 10px;
+                                margin-top: 20px;
                                 border-top: 1px solid #eee;
                                 padding-top: 12px;
                             "
