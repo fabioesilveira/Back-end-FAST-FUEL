@@ -46,8 +46,8 @@ const imageStylesOrder = {
     "10": { width: "79px", height: "79px", marginTop: "0px" },
     "15": { width: "104px", height: "88px", marginTop: "0px" },
     "16": { width: "86px", height: "80px", marginTop: "0px" },
-    "17": { width: "71px", height: "77px", marginTop: "0px" },
-    "18": { width: "58px", height: "49px", marginTop: "0px" },
+    "17": { width: "70px", height: "76px", marginTop: "0px" },
+    "18": { width: "56px", height: "47px", marginTop: "0px" },
 };
 
 const buildOrderItemsHtml = (items = []) => {
@@ -75,7 +75,6 @@ const buildOrderItemsHtml = (items = []) => {
                             width: 110px;
                             padding-top: 12px;
                             padding-bottom: 12px;
-                            padding-left: ${imageStyle.paddingLeft || "0px"};
                             vertical-align: top;
                             text-align: center;
                         "
@@ -238,8 +237,7 @@ const sendOrderConfirmationEmail = async ({
                         </p>
 
                         <p style="font-size: 15px; line-height: 1.6; margin: 0 0 24px;">
-                            We received your order and it is now waiting for preparation.
-                            Your order details are below.
+                            Thanks for ordering with Fast Fuel! Your order has been received and is getting ready to move through the kitchen. Check out your order details below and use the tracking button to follow every step.
                         </p>
 
                         <div
