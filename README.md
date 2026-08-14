@@ -38,6 +38,12 @@ The project follows a layered architecture based on **MVC and a Service Layer**,
 - Stripe Payment Element
 - Stripe Sandbox / Test Mode
 
+**Transactional Email**
+
+- Resend API
+- Automated order confirmation emails
+- Custom domain email delivery
+
 **Testing**
 
 - Jest (unit testing)
@@ -65,6 +71,7 @@ D --> E[Service Layer - Business Logic]
 E --> F[Models - Database Queries]
 F --> G[(MySQL Database)]
 E --> H[Stripe API - PaymentIntents]
+E --> I[Resend API - Transactional Emails]
  ```
  ---
 
@@ -135,6 +142,44 @@ The Stripe PaymentIntent ID is saved with the order as the payment reference.
 This prevents the frontend from deciding the amount charged or marking a payment as approved without server-side verification.
 
 The integration currently runs in **Stripe Sandbox / Test Mode**, so no real money is processed.
+
+---
+
+### Transactional Order Confirmation Emails
+
+Fast Fuel integrates with **Resend** to automatically send transactional order confirmation emails after an order is successfully created.
+
+The email is triggered by the backend after:
+
+- Stripe payment verification succeeds
+- The order is stored in MySQL
+- A unique order number is generated
+
+Confirmation emails include:
+
+- Customer name
+- Order number
+- Delivery address
+- Purchased products
+- Product images
+- Item quantities
+- Item prices
+- Subtotal
+- Combo discount
+- Tax
+- Delivery fee
+- Final total
+- A direct link to track the order
+
+Product information is generated using the stored order snapshot, ensuring that the email reflects the exact product data and pricing associated with the purchase.
+
+Emails are sent through the verified Fast Fuel domain using:
+
+`orders@fast-fuel-orders.com`
+
+If email delivery fails, the order remains successfully created because email delivery is handled separately from the core order transaction.
+
+---
 
 #### Payment Flow
 
@@ -457,11 +502,11 @@ Messages are stored in the database and can be managed by administrators through
 
 ## Deployment
 
-The Fast Fuel backend API is deployed on **Railway**, where the Node.js server, MySQL database connection, JWT secret, and Stripe secret key are managed through environment variables.
+The Fast Fuel backend API is deployed on **Railway**, where the Node.js server, MySQL database connection, JWT secret, Stripe secret key, Resend API key, and production tracking URL are managed through environment variables.
 
-The deployed frontend communicates with the Railway API, while payment processing is handled through Stripe's sandbox environment.
+The deployed frontend communicates with the Railway API, payment processing is handled through Stripe's sandbox environment, and transactional order confirmation emails are delivered through Resend using the verified `fast-fuel-orders.com` domain.
 
-This allows the backend to run in a production environment while safely simulating real payment workflows without processing real money.
+This allows the application to simulate a complete production-style ordering workflow including payment processing, database persistence, transactional email notifications, and order tracking.
 
 ---
 
@@ -498,8 +543,10 @@ Create a .env file in the root of the project and add your database credentials.
 - DB_NAME=fast_fuel
 - JWT_SECRET=your_secret_key
 - STRIPE_SECRET_KEY=sk_test_your_stripe_test_key
+- RESEND_API_KEY=re_your_resend_api_key
+- ORDER_TRACKING_URL=http://localhost:5173/orders
 
-> The Stripe secret key must only be stored on the backend and should never be exposed in frontend code.
+> Stripe and Resend secret keys must only be stored on the backend and must never be exposed in frontend code.
 
 The frontend uses a separate Stripe publishable key through:
 
