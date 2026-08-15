@@ -7,11 +7,22 @@ const formatMoney = (value = 0) => {
 };
 
 const buildAddressHtml = (address = {}) => {
-    const line1 = [address.street, address.apt ? `Apt ${address.apt}` : ""]
+    const streetOnly = String(address.street || "")
+        .split(",")[0]
+        .trim();
+
+    const line1 = [
+        streetOnly,
+        address.apt ? `Apt ${address.apt}` : "",
+    ]
         .filter(Boolean)
         .join(", ");
 
-    const line2 = [address.city, address.state, address.zip]
+    const line2 = [
+        address.city,
+        address.state,
+        address.zip,
+    ]
         .filter(Boolean)
         .join(", ");
 
@@ -20,11 +31,8 @@ const buildAddressHtml = (address = {}) => {
     return [line1, line2, line3]
         .filter(Boolean)
         .map(
-            (line) => `
-                <div style="font-size: 14px; color: #444; line-height: 1.5;">
-                    ${line}
-                </div>
-            `
+            (line) =>
+                `<div style="font-size: 14px; color: #444; line-height: 1.5;">${line}</div>`
         )
         .join("");
 };
