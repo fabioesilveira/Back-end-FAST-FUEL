@@ -4,6 +4,7 @@ const requireAdmin = require("../middlewares/requireAdmin");
 const {
     postUserController,
     verifyUserEmailController,
+    resendEmailVerificationController,
     postUserLoginController,
     getAdminUsersController,
     getNormalUsersController,
@@ -31,6 +32,12 @@ router.delete("/removeUser", authMiddleware, removeOwnUserController);
 
 // Verify email
 router.get("/verify-email", verifyUserEmailController);
+
+// Resend verification email
+router.post(
+    "/resend-verification",
+    resendEmailVerificationController
+);
 
 // Get user by id
 router.get("/:id", authMiddleware, getUserByIdController);

@@ -3,6 +3,7 @@ const { normalizeEmail } = require("../utils/normalize");
 const {
     postUserService,
     verifyUserEmailService,
+    resendEmailVerificationService,
     postUserLoginService,
     getAdminUsersService,
     getNormalUsersService,
@@ -83,6 +84,36 @@ async function verifyUserEmailController(req, res) {
 
         return res.status(500).json({
             msg: "Failed to verify email",
+        });
+    }
+}
+
+async function resendEmailVerificationController(req, res) {
+    try {
+        let { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                msg: "Email is required",
+            });
+        }
+
+        email = normalizeEmail(email);
+
+        const data = await resendEmailVerificationService(email);
+
+        if (data?.status) {
+            return res.status(data.status).json({
+                msg: data.msg,
+            });
+        }
+
+        return res.status(200).json(data);
+    } catch (error) {
+        console.error("RESEND VERIFICATION ERROR:", error);
+
+        return res.status(500).json({
+            msg: "Failed to resend verification email",
         });
     }
 }
@@ -196,6 +227,7 @@ async function getUserByIdController(req, res) {
 module.exports = {
     postUserController,
     verifyUserEmailController,
+    resendEmailVerificationController,
     postUserLoginController,
     getAdminUsersController,
     getNormalUsersController,

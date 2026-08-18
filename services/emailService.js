@@ -416,8 +416,8 @@ const sendOrderConfirmationEmail = async ({
                                                 color: #ffffff;
                                                 text-decoration: none;
                                                 font-weight: 800;
-                                                font-size: 14px;
-                                                padding: 14px 22px;
+                                                font-size: 13px;
+                                                padding: 12px 20px;
                                                 border-radius: 999px;
                                                 letter-spacing: 0.06em;
                                                 text-transform: uppercase;
@@ -545,8 +545,8 @@ const sendEmailVerification = async ({
                                     color: #ffffff;
                                     text-decoration: none;
                                     font-weight: 800;
-                                    font-size: 14px;
-                                    padding: 14px 22px;
+                                    font-size: 13px;
+                                    padding: 12px 20px;
                                     border-radius: 999px;
                                     letter-spacing: 0.06em;
                                     text-transform: uppercase;

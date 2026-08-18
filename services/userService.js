@@ -119,6 +119,53 @@ async function verifyUserEmailService(token) {
     };
 }
 
+async function resendEmailVerificationService(email) {
+    const e = String(email || "").trim().toLowerCase();
+
+    const rows = await findUserByEmail(e);
+    const user = rows[0];
+
+    if (!user) {
+        return {
+            msg: "User not found",
+            status: 404,
+        };
+    }
+
+    if (user.email_verified) {
+        return {
+            msg: "Email is already verified",
+            status: 400,
+        };
+    }
+
+    const verificationToken = crypto
+        .randomBytes(32)
+        .toString("hex");
+
+    const verificationTokenHash = hashToken(verificationToken);
+
+    const verificationExpires = new Date(
+        Date.now() + 60 * 60 * 1000
+    );
+
+    await setEmailVerificationToken(
+        user.id,
+        verificationTokenHash,
+        verificationExpires
+    );
+
+    await sendEmailVerification({
+        customerName: user.fullName,
+        customerEmail: user.email,
+        verificationToken,
+    });
+
+    return {
+        msg: "Verification email sent successfully",
+    };
+}
+
 async function postUserLoginService(email, password) {
     const e = String(email || "").trim().toLowerCase();
 
@@ -211,6 +258,7 @@ async function getUserByIdService(requestedId, loggedUser) {
 module.exports = {
     postUserService,
     verifyUserEmailService,
+    resendEmailVerificationService,
     postUserLoginService,
     getAdminUsersService,
     getNormalUsersService,
