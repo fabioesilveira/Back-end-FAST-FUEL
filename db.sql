@@ -12,9 +12,13 @@ CREATE TABLE users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     type ENUM('admin', 'normal') NOT NULL DEFAULT 'normal',
+    email_verified TINYINT(1) NOT NULL DEFAULT 0,
+    email_verification_token VARCHAR(64) NULL,
+    email_verification_expires DATETIME NULL,
+    password_reset_token VARCHAR(64) NULL,
+    password_reset_expires DATETIME NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
 -- PRODUCTS
 
 CREATE TABLE products (

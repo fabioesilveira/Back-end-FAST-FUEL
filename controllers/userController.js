@@ -2,6 +2,7 @@ const { normalizeEmail } = require("../utils/normalize");
 
 const {
     postUserService,
+    verifyUserEmailService,
     postUserLoginService,
     getAdminUsersService,
     getNormalUsersService,
@@ -15,19 +16,24 @@ async function postUserController(req, res) {
         let { fullName, phone, email, password } = req.body;
 
         if (!fullName || !phone || !email || !password) {
-            return res.status(400).json({ msg: "All fields are required" });
+            return res.status(400).json({
+                msg: "All fields are required",
+            });
         }
 
         email = normalizeEmail(email);
 
-        const data = await postUserService(fullName, phone, email, password);
+        const data = await postUserService(
+            fullName,
+            phone,
+            email,
+            password
+        );
 
-        if (data?.msg === "User already exists") {
-            return res.status(409).json({ msg: "This email is already in use" });
-        }
-
-        if (data?.msg) {
-            return res.status(400).json(data);
+        if (data?.status) {
+            return res.status(data.status).json({
+                msg: data.msg,
+            });
         }
 
         return res.status(201).json({
@@ -35,15 +41,49 @@ async function postUserController(req, res) {
             fullName,
             email,
             type: "normal",
+            emailSent: data.emailSent,
+            msg: data.msg,
         });
     } catch (error) {
         console.error("REGISTER ERROR:", error);
 
         if (error?.code === "ER_DUP_ENTRY") {
-            return res.status(409).json({ msg: "This email is already in use" });
+            return res.status(409).json({
+                msg: "This email is already in use",
+            });
         }
 
-        return res.status(500).json({ msg: "Internal server error" });
+        return res.status(500).json({
+            msg: "Internal server error",
+        });
+    }
+}
+
+async function verifyUserEmailController(req, res) {
+    try {
+        const { token } = req.query;
+
+        if (!token) {
+            return res.status(400).json({
+                msg: "Verification token is required",
+            });
+        }
+
+        const data = await verifyUserEmailService(token);
+
+        if (data?.status) {
+            return res.status(data.status).json({
+                msg: data.msg,
+            });
+        }
+
+        return res.status(200).json(data);
+    } catch (error) {
+        console.error("VERIFY EMAIL ERROR:", error);
+
+        return res.status(500).json({
+            msg: "Failed to verify email",
+        });
     }
 }
 
@@ -59,12 +99,19 @@ async function postUserLoginController(req, res) {
 
         const user = await postUserLoginService(email, password);
 
-        if (user?.msg === "User not found" || user?.msg === "Invalid Password") {
-            return res.status(401).json({ msg: "Invalid email or password" });
+        if (
+            user?.msg === "User not found" ||
+            user?.msg === "Invalid Password"
+        ) {
+            return res.status(401).json({
+                msg: "Invalid email or password",
+            });
         }
 
-        if (user?.msg) {
-            return res.status(400).json(user);
+        if (user?.status) {
+            return res.status(user.status).json({
+                msg: user.msg,
+            });
         }
 
         return res.status(200).json(user);
@@ -148,6 +195,7 @@ async function getUserByIdController(req, res) {
 
 module.exports = {
     postUserController,
+    verifyUserEmailController,
     postUserLoginController,
     getAdminUsersController,
     getNormalUsersController,

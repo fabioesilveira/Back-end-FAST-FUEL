@@ -1,5 +1,7 @@
+const crypto = require("crypto");
 const bcryptjs = require("bcryptjs");
 const { generateToken } = require("../utils/jwt");
+
 
 const {
     findUserByEmail,
@@ -9,18 +11,112 @@ const {
     findUserById,
     deleteUserById,
     updateUserPassword,
+
+    setEmailVerificationToken,
+    findUserByVerificationToken,
+    verifyUserEmail,
 } = require("../models/userModel");
+
+const {
+    sendEmailVerification,
+} = require("./emailService");
+
+const hashToken = (token) => {
+    return crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+};
 
 async function postUserService(fullName, phone, email, password) {
     const e = String(email || "").trim().toLowerCase();
 
     const existing = await findUserByEmail(e);
-    if (existing.length > 0) return { msg: "User already exists" };
+
+    if (existing.length > 0) {
+        return {
+            msg: "User already exists",
+            status: 409,
+        };
+    }
 
     const hashedPassword = await bcryptjs.hash(password, 10);
-    const result = await createNewUser(fullName, phone, e, hashedPassword);
 
-    return result;
+    const result = await createNewUser(
+        fullName,
+        phone,
+        e,
+        hashedPassword
+    );
+
+    const verificationToken = crypto
+        .randomBytes(32)
+        .toString("hex");
+
+    const verificationTokenHash = hashToken(verificationToken);
+
+    const verificationExpires = new Date(
+        Date.now() + 60 * 60 * 1000
+    );
+
+    await setEmailVerificationToken(
+        result.insertId,
+        verificationTokenHash,
+        verificationExpires
+    );
+
+    try {
+        await sendEmailVerification({
+            customerName: fullName,
+            customerEmail: e,
+            verificationToken,
+        });
+    } catch (error) {
+        console.error(
+            "Email verification failed:",
+            error
+        );
+
+        return {
+            ...result,
+            msg: "Account created, but verification email could not be sent.",
+            emailSent: false,
+        };
+    }
+
+    return {
+        ...result,
+        msg: "Account created. Please verify your email.",
+        emailSent: true,
+    };
+}
+
+async function verifyUserEmailService(token) {
+    if (!token) {
+        return {
+            msg: "Verification token is required",
+            status: 400,
+        };
+    }
+
+    const tokenHash = hashToken(token);
+
+    const rows = await findUserByVerificationToken(tokenHash);
+
+    const user = rows[0];
+
+    if (!user) {
+        return {
+            msg: "Verification link is invalid or has expired",
+            status: 400,
+        };
+    }
+
+    await verifyUserEmail(user.id);
+
+    return {
+        msg: "Email verified successfully",
+    };
 }
 
 async function postUserLoginService(email, password) {
@@ -30,6 +126,13 @@ async function postUserLoginService(email, password) {
     const user = rows[0];
 
     if (!user) return { msg: "User not found" };
+
+    if (!user.email_verified) {
+        return {
+            msg: "Please verify your email before signing in",
+            status: 403,
+        };
+    }
 
     const ok = await bcryptjs.compare(password, user.password);
     if (!ok) return { msg: "Invalid Password" };
@@ -107,6 +210,7 @@ async function getUserByIdService(requestedId, loggedUser) {
 
 module.exports = {
     postUserService,
+    verifyUserEmailService,
     postUserLoginService,
     getAdminUsersService,
     getNormalUsersService,

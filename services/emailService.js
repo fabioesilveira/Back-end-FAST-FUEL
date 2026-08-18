@@ -2,6 +2,10 @@ const { Resend } = require("resend");
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+const getFrontendUrl = () => {
+    return process.env.FRONTEND_URL || "http://localhost:5173";
+};
+
 const formatMoney = (value = 0) => {
     return `$${Number(value || 0).toFixed(2)}`;
 };
@@ -450,6 +454,258 @@ const sendOrderConfirmationEmail = async ({
     return data;
 };
 
+const sendEmailVerification = async ({
+    customerName,
+    customerEmail,
+    verificationToken,
+}) => {
+    const verificationUrl =
+        `${getFrontendUrl()}/verify-email?token=${encodeURIComponent(
+            verificationToken
+        )}`;
+
+    const { data, error } = await resend.emails.send({
+        from: "Fast Fuel <orders@fast-fuel-orders.com>",
+        to: [customerEmail],
+        subject: "Fast Fuel - Verify Your Email",
+        html: `
+            <div
+                style="
+                    margin: 0;
+                    padding: 24px 12px;
+                    background: #fffaf5;
+                    font-family: Arial, sans-serif;
+                    color: #222;
+                "
+            >
+                <div
+                    style="
+                        max-width: 560px;
+                        margin: 0 auto;
+                        background: #ffffff;
+                        border-radius: 18px;
+                        overflow: hidden;
+                        border: 1px solid #f0e4d8;
+                    "
+                >
+                    <div
+                        style="
+                            background: #0d47a1;
+                            padding: 24px;
+                            text-align: center;
+                        "
+                    >
+                        <div
+                            style="
+                                color: #ffffff;
+                                font-size: 24px;
+                                font-weight: 800;
+                                letter-spacing: 0.04em;
+                            "
+                        >
+                            FAST FUEL
+                        </div>
+
+                        <div
+                            style="
+                                color: #ffe0c7;
+                                font-size: 14px;
+                                margin-top: 8px;
+                                letter-spacing: 0.08em;
+                                text-transform: uppercase;
+                            "
+                        >
+                            Verify Your Email
+                        </div>
+                    </div>
+
+                    <div style="padding: 28px 24px;">
+                        <p style="font-size: 15px; margin: 0 0 18px;">
+                            Hi <strong>${customerName || "Customer"}</strong>,
+                        </p>
+
+                        <p
+                            style="
+                                font-size: 15px;
+                                line-height: 1.6;
+                                margin: 0 0 24px;
+                            "
+                        >
+                            Thanks for creating a Fast Fuel account.
+                            Please verify your email address to complete
+                            your registration.
+                        </p>
+
+                        <div style="text-align: center; margin: 28px 0;">
+                            <a
+                                href="${verificationUrl}"
+                                style="
+                                    display: inline-block;
+                                    background: #e65100;
+                                    color: #ffffff;
+                                    text-decoration: none;
+                                    font-weight: 800;
+                                    font-size: 14px;
+                                    padding: 14px 22px;
+                                    border-radius: 999px;
+                                    letter-spacing: 0.06em;
+                                    text-transform: uppercase;
+                                "
+                            >
+                                Verify Email
+                            </a>
+                        </div>
+
+                        <p
+                            style="
+                                font-size: 13px;
+                                color: #777;
+                                line-height: 1.6;
+                                text-align: center;
+                                margin: 0;
+                            "
+                        >
+                            This verification link will expire for security purposes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `,
+    });
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
+};
+
+const sendPasswordResetEmail = async ({
+    customerName,
+    customerEmail,
+    resetToken,
+}) => {
+    const resetUrl =
+        `${getFrontendUrl()}/reset-password?token=${encodeURIComponent(
+            resetToken
+        )}`;
+
+    const { data, error } = await resend.emails.send({
+        from: "Fast Fuel <orders@fast-fuel-orders.com>",
+        to: [customerEmail],
+        subject: "Fast Fuel - Reset Your Password",
+        html: `
+            <div
+                style="
+                    margin: 0;
+                    padding: 24px 12px;
+                    background: #fffaf5;
+                    font-family: Arial, sans-serif;
+                    color: #222;
+                "
+            >
+                <div
+                    style="
+                        max-width: 560px;
+                        margin: 0 auto;
+                        background: #ffffff;
+                        border-radius: 18px;
+                        overflow: hidden;
+                        border: 1px solid #f0e4d8;
+                    "
+                >
+                    <div
+                        style="
+                            background: #0d47a1;
+                            padding: 24px;
+                            text-align: center;
+                        "
+                    >
+                        <div
+                            style="
+                                color: #ffffff;
+                                font-size: 24px;
+                                font-weight: 800;
+                                letter-spacing: 0.04em;
+                            "
+                        >
+                            FAST FUEL
+                        </div>
+
+                        <div
+                            style="
+                                color: #ffe0c7;
+                                font-size: 14px;
+                                margin-top: 8px;
+                                letter-spacing: 0.08em;
+                                text-transform: uppercase;
+                            "
+                        >
+                            Password Reset
+                        </div>
+                    </div>
+
+                    <div style="padding: 28px 24px;">
+                        <p style="font-size: 15px; margin: 0 0 18px;">
+                            Hi <strong>${customerName || "Customer"}</strong>,
+                        </p>
+
+                        <p
+                            style="
+                                font-size: 15px;
+                                line-height: 1.6;
+                                margin: 0 0 24px;
+                            "
+                        >
+                            We received a request to reset the password
+                            for your Fast Fuel account.
+                        </p>
+
+                        <div style="text-align: center; margin: 28px 0;">
+                            <a
+                                href="${resetUrl}"
+                                style="
+                                    display: inline-block;
+                                    background: #e65100;
+                                    color: #ffffff;
+                                    text-decoration: none;
+                                    font-weight: 800;
+                                    font-size: 14px;
+                                    padding: 14px 22px;
+                                    border-radius: 999px;
+                                    letter-spacing: 0.06em;
+                                    text-transform: uppercase;
+                                "
+                            >
+                                Reset Password
+                            </a>
+                        </div>
+
+                        <p
+                            style="
+                                font-size: 13px;
+                                color: #777;
+                                line-height: 1.6;
+                                text-align: center;
+                                margin: 0;
+                            "
+                        >
+                            If you did not request a password reset,
+                            you can safely ignore this email.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `,
+    });
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
+};
+
 const sendTestEmail = async (to) => {
     const { data, error } = await resend.emails.send({
         from: "Fast Fuel <orders@fast-fuel-orders.com>",
@@ -473,4 +729,6 @@ const sendTestEmail = async (to) => {
 module.exports = {
     sendTestEmail,
     sendOrderConfirmationEmail,
+    sendEmailVerification,
+    sendPasswordResetEmail,
 };

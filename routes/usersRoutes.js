@@ -3,6 +3,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const requireAdmin = require("../middlewares/requireAdmin");
 const {
     postUserController,
+    verifyUserEmailController,
     postUserLoginController,
     getAdminUsersController,
     getNormalUsersController,
@@ -27,6 +28,9 @@ router.post("/login", postUserLoginController);
 
 // Delete own account (logged user)
 router.delete("/removeUser", authMiddleware, removeOwnUserController);
+
+// Verify email
+router.get("/verify-email", verifyUserEmailController);
 
 // Get user by id
 router.get("/:id", authMiddleware, getUserByIdController);

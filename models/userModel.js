@@ -66,6 +66,81 @@ async function findUserById(id) {
     return rows;
 }
 
+async function setEmailVerificationToken(userId, tokenHash, expiresAt) {
+    const [result] = await connection.execute(
+        `UPDATE users
+         SET email_verification_token = ?,
+             email_verification_expires = ?
+         WHERE id = ?`,
+        [tokenHash, expiresAt, userId]
+    );
+
+    return result;
+}
+
+async function findUserByVerificationToken(tokenHash) {
+    const [rows] = await connection.execute(
+        `SELECT *
+         FROM users
+         WHERE email_verification_token = ?
+           AND email_verification_expires > NOW()
+         LIMIT 1`,
+        [tokenHash]
+    );
+
+    return rows;
+}
+
+async function verifyUserEmail(userId) {
+    const [result] = await connection.execute(
+        `UPDATE users
+         SET email_verified = 1,
+             email_verification_token = NULL,
+             email_verification_expires = NULL
+         WHERE id = ?`,
+        [userId]
+    );
+
+    return result;
+}
+
+async function setPasswordResetToken(userId, tokenHash, expiresAt) {
+    const [result] = await connection.execute(
+        `UPDATE users
+         SET password_reset_token = ?,
+             password_reset_expires = ?
+         WHERE id = ?`,
+        [tokenHash, expiresAt, userId]
+    );
+
+    return result;
+}
+
+async function findUserByPasswordResetToken(tokenHash) {
+    const [rows] = await connection.execute(
+        `SELECT *
+         FROM users
+         WHERE password_reset_token = ?
+           AND password_reset_expires > NOW()
+         LIMIT 1`,
+        [tokenHash]
+    );
+
+    return rows;
+}
+
+async function clearPasswordResetToken(userId) {
+    const [result] = await connection.execute(
+        `UPDATE users
+         SET password_reset_token = NULL,
+             password_reset_expires = NULL
+         WHERE id = ?`,
+        [userId]
+    );
+
+    return result;
+}
+
 module.exports = {
     createNewUser,
     findUserByEmail,
@@ -74,4 +149,12 @@ module.exports = {
     deleteUserById,
     updateUserPassword,
     findUserById,
+
+    setEmailVerificationToken,
+    findUserByVerificationToken,
+    verifyUserEmail,
+
+    setPasswordResetToken,
+    findUserByPasswordResetToken,
+    clearPasswordResetToken,
 };
