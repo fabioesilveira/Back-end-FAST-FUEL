@@ -19,6 +19,7 @@ CREATE TABLE users (
     password_reset_expires DATETIME NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
 -- PRODUCTS
 
 CREATE TABLE products (
