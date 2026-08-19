@@ -218,6 +218,18 @@ async function resetPasswordService(token, newPassword) {
         };
     }
 
+    const isValidPassword =
+        /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(
+            String(newPassword)
+        );
+
+    if (!isValidPassword) {
+        return {
+            msg: "Password must be at least 8 characters long and contain at least one letter and one number.",
+            status: 400,
+        };
+    }
+
     const tokenHash = hashToken(token);
 
     const rows = await findUserByPasswordResetToken(tokenHash);
@@ -230,42 +242,14 @@ async function resetPasswordService(token, newPassword) {
         };
     }
 
-    const hashedPassword = await bcryptjs.hash(
+    const isSamePassword = await bcryptjs.compare(
         String(newPassword),
-        10
+        user.password
     );
 
-    await updateUserPassword(
-        user.id,
-        hashedPassword
-    );
-
-    await clearPasswordResetToken(user.id);
-
-    return {
-        msg: "Password updated successfully",
-    };
-}
-
-async function resetPasswordService(token, newPassword) {
-    if (!token || !newPassword) {
+    if (isSamePassword) {
         return {
-            msg: "Token and new password are required",
-            status: 400,
-        };
-    }
-
-    const tokenHash = hashToken(token);
-
-    const rows = await findUserByPasswordResetToken(
-        tokenHash
-    );
-
-    const user = rows[0];
-
-    if (!user) {
-        return {
-            msg: "Password reset link is invalid or has expired",
+            msg: "New password cannot be the same as your current password.",
             status: 400,
         };
     }
