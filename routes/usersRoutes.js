@@ -5,6 +5,8 @@ const {
     postUserController,
     verifyUserEmailController,
     resendEmailVerificationController,
+    forgotPasswordController,
+    resetPasswordController,
     postUserLoginController,
     getAdminUsersController,
     getNormalUsersController,
@@ -37,6 +39,18 @@ router.get("/verify-email", verifyUserEmailController);
 router.post(
     "/resend-verification",
     resendEmailVerificationController
+);
+
+// Forgot password
+router.post(
+    "/forgot-password",
+    forgotPasswordController
+);
+
+// Reset password
+router.post(
+    "/reset-password",
+    resetPasswordController
 );
 
 // Get user by id

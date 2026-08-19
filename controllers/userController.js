@@ -4,6 +4,8 @@ const {
     postUserService,
     verifyUserEmailService,
     resendEmailVerificationService,
+    forgotPasswordService,
+    resetPasswordService,
     postUserLoginService,
     getAdminUsersService,
     getNormalUsersService,
@@ -118,6 +120,61 @@ async function resendEmailVerificationController(req, res) {
     }
 }
 
+async function forgotPasswordController(req, res) {
+    try {
+        let { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                msg: "Email is required",
+            });
+        }
+
+        email = normalizeEmail(email);
+
+        const data = await forgotPasswordService(email);
+
+        return res.status(200).json(data);
+    } catch (error) {
+        console.error("FORGOT PASSWORD ERROR:", error);
+
+        return res.status(500).json({
+            msg: "Failed to process password reset request",
+        });
+    }
+}
+
+async function resetPasswordController(req, res) {
+    try {
+        const { token, password } = req.body;
+
+        if (!token || !password) {
+            return res.status(400).json({
+                msg: "Token and new password are required",
+            });
+        }
+
+        const data = await resetPasswordService(
+            token,
+            password
+        );
+
+        if (data?.status) {
+            return res.status(data.status).json({
+                msg: data.msg,
+            });
+        }
+
+        return res.status(200).json(data);
+    } catch (error) {
+        console.error("RESET PASSWORD ERROR:", error);
+
+        return res.status(500).json({
+            msg: "Failed to reset password",
+        });
+    }
+}
+
 async function postUserLoginController(req, res) {
     try {
         let { email, password } = req.body;
@@ -228,6 +285,10 @@ module.exports = {
     postUserController,
     verifyUserEmailController,
     resendEmailVerificationController,
+
+    forgotPasswordController,
+    resetPasswordController,
+
     postUserLoginController,
     getAdminUsersController,
     getNormalUsersController,

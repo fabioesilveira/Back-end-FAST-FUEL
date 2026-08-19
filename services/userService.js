@@ -15,10 +15,15 @@ const {
     setEmailVerificationToken,
     findUserByVerificationToken,
     verifyUserEmail,
+
+    setPasswordResetToken,
+    findUserByPasswordResetToken,
+    clearPasswordResetToken,
 } = require("../models/userModel");
 
 const {
     sendEmailVerification,
+    sendPasswordResetEmail,
 } = require("./emailService");
 
 const hashToken = (token) => {
@@ -166,6 +171,122 @@ async function resendEmailVerificationService(email) {
     };
 }
 
+async function forgotPasswordService(email) {
+    const e = String(email || "").trim().toLowerCase();
+
+    const rows = await findUserByEmail(e);
+    const user = rows[0];
+
+    if (!user) {
+        return {
+            msg: "If an account exists with this email, a password reset link has been sent.",
+        };
+    }
+
+    const resetToken = crypto
+        .randomBytes(32)
+        .toString("hex");
+
+    const resetTokenHash = hashToken(resetToken);
+
+    const resetExpires = new Date(
+        Date.now() + 30 * 60 * 1000
+    );
+
+    await setPasswordResetToken(
+        user.id,
+        resetTokenHash,
+        resetExpires
+    );
+
+    await sendPasswordResetEmail({
+        customerName: user.fullName,
+        customerEmail: user.email,
+        resetToken,
+    });
+
+    return {
+        msg: "If an account exists with this email, a password reset link has been sent.",
+    };
+}
+
+async function resetPasswordService(token, newPassword) {
+    if (!token || !newPassword) {
+        return {
+            msg: "Token and new password are required",
+            status: 400,
+        };
+    }
+
+    const tokenHash = hashToken(token);
+
+    const rows = await findUserByPasswordResetToken(tokenHash);
+    const user = rows[0];
+
+    if (!user) {
+        return {
+            msg: "Password reset link is invalid or has expired",
+            status: 400,
+        };
+    }
+
+    const hashedPassword = await bcryptjs.hash(
+        String(newPassword),
+        10
+    );
+
+    await updateUserPassword(
+        user.id,
+        hashedPassword
+    );
+
+    await clearPasswordResetToken(user.id);
+
+    return {
+        msg: "Password updated successfully",
+    };
+}
+
+async function resetPasswordService(token, newPassword) {
+    if (!token || !newPassword) {
+        return {
+            msg: "Token and new password are required",
+            status: 400,
+        };
+    }
+
+    const tokenHash = hashToken(token);
+
+    const rows = await findUserByPasswordResetToken(
+        tokenHash
+    );
+
+    const user = rows[0];
+
+    if (!user) {
+        return {
+            msg: "Password reset link is invalid or has expired",
+            status: 400,
+        };
+    }
+
+    const hashedPassword = await bcryptjs.hash(
+        String(newPassword),
+        10
+    );
+
+    await updateUserPassword(
+        user.id,
+        hashedPassword
+    );
+
+    await clearPasswordResetToken(user.id);
+
+    return {
+        msg: "Password updated successfully",
+    };
+}
+
 async function postUserLoginService(email, password) {
     const e = String(email || "").trim().toLowerCase();
 
@@ -259,6 +380,10 @@ module.exports = {
     postUserService,
     verifyUserEmailService,
     resendEmailVerificationService,
+
+    forgotPasswordService,
+    resetPasswordService,
+
     postUserLoginService,
     getAdminUsersService,
     getNormalUsersService,
