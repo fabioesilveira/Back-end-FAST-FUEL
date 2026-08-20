@@ -10,7 +10,7 @@ The backend communicates with the **Fast Fuel frontend application**, which prov
 
 The project follows a layered architecture based on **MVC and a Service Layer**, where routes, controllers, services, and models are separated to keep the code organized, scalable, and maintainable.
 
-🔗 **Live Demo (Frontend):** https://fast-fuel-project-git-main-fabioesilveiras-projects.vercel.app/  
+🔗 **Live Demo (Frontend):** https://fast-fuel-project.vercel.app/
 📦 **Frontend Repo:** https://github.com/fabioesilveira/FAST-FUEL-PROJECT
 
 ---
@@ -42,6 +42,8 @@ The project follows a layered architecture based on **MVC and a Service Layer**,
 
 - Resend API
 - Automated order confirmation emails
+- Email verification emails
+- Password reset emails
 - Custom domain email delivery
 
 **Testing**
@@ -274,11 +276,56 @@ This system mirrors real-world review workflows used in food delivery and e-comm
 
 The API includes user authentication using **JSON Web Tokens (JWT)**.
 
-User passwords are securely stored using **bcrypt hashing**, which prevents raw passwords from being stored in the database.
+User passwords are securely stored using **bcrypt hashing**, preventing raw passwords from being stored in the database.
+
+New accounts require **email verification** before authentication. Verification links are generated using cryptographically random tokens, while only hashed versions of those tokens are stored in the database.
+
+The authentication system also includes a secure **forgot-password and password-reset workflow** using hashed, expiring reset tokens delivered through Resend.
 
 Once authenticated, users receive a JWT token that allows them to access protected routes. Certain routes are restricted to administrators using role-based middleware.
 
-This ensures that sensitive operations such as order management and product updates are only accessible to authorized users.
+Security features include:
+
+- JWT authentication
+- bcrypt password hashing
+- Email verification
+- Hashed and expiring verification tokens
+- Forgot-password flow
+- Hashed and expiring password reset tokens
+- Password reuse validation
+- Protected routes
+- Role-based authorization
+- User self-access restrictions
+
+This ensures that sensitive account and administrative operations are only accessible to authorized users.
+
+---
+
+### Email Verification and Password Recovery
+
+Fast Fuel includes an email verification and password recovery flow using secure, expiring tokens.
+
+When a new user registers:
+
+- A random verification token is generated on the backend
+- Only a SHA-256 hash of the token is stored in MySQL
+- The verification link is sent through Resend
+- The token expires after a limited period
+- The user must verify their email before signing in
+
+The API also supports a complete forgot-password flow:
+
+- Users can request a password reset link by email
+- A cryptographically random reset token is generated
+- Only the hashed token is stored in the database
+- Reset tokens expire automatically
+- The backend validates the token before allowing a password change
+- Passwords are re-hashed with bcrypt before being stored
+- Reset tokens are cleared after a successful password update
+
+For security, password reset requests return a generic response regardless of whether the email exists, helping prevent account enumeration.
+
+Successfully completing a password reset also confirms ownership of the email address and marks the account as verified when necessary.
 
 ---
 
@@ -449,17 +496,29 @@ Review system features:
 
 ### Users & Authentication
 
-POST /users/register  
-Create a new user account.
-
-POST /users/login  
-Authenticate a user and return a JWT token.
-
 GET /users/admin  
 Retrieve all users, including administrators (admin only).
 
 GET /users  
 Retrieve all normal users (admin only).
+
+POST /users/register  
+Create a new user account and send an email verification link.
+
+POST /users/login  
+Authenticate a verified user and return a JWT token.
+
+GET /users/verify-email?token=  
+Verify a user's email using the token sent by email.
+
+POST /users/resend-verification  
+Send a new verification email to an unverified account.
+
+POST /users/forgot-password  
+Request a password reset email.
+
+POST /users/reset-password  
+Reset a user's password using a valid password reset token.
 
 GET /users/:id  
 Retrieve details for a specific user. Users can access their own information, while administrators can access any user.
@@ -474,6 +533,12 @@ Authentication and security features:
 
 - JSON Web Token (JWT) authentication
 - Password hashing using bcrypt
+- Email verification
+- Verification tokens stored as SHA-256 hashes
+- Expiring email verification tokens
+- Forgot-password and password-reset workflow
+- Password reset tokens stored as SHA-256 hashes
+- Expiring password reset tokens
 - Protected routes using middleware
 - Role-based authorization for administrators
 - Self-access restrictions for user information
@@ -544,6 +609,7 @@ Create a .env file in the root of the project and add your database credentials.
 - JWT_SECRET=your_secret_key
 - STRIPE_SECRET_KEY=sk_test_your_stripe_test_key
 - RESEND_API_KEY=re_your_resend_api_key
+- FRONTEND_URL=http://localhost:5173
 - ORDER_TRACKING_URL=http://localhost:5173/orders
 
 > Stripe and Resend secret keys must only be stored on the backend and must never be exposed in frontend code.
