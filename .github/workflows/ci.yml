@@ -45,6 +45,6 @@ jobs:
         run: npm install --global @railway/cli
 
       - name: Deploy to Railway
-        run: railway up --ci
+        run: railway up --ci --service Back-end-FAST-FUEL
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
