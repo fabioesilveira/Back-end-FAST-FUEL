@@ -10,7 +10,7 @@ The backend communicates with the **Fast Fuel frontend application**, which prov
 
 The project follows a layered architecture based on **MVC and a Service Layer**, where routes, controllers, services, and models are separated to keep the code organized, scalable, and maintainable.
 
-🔗 **Live Demo (Frontend):** https://fast-fuel-project.vercel.app/
+🔗 **Live Demo (Frontend):** https://fast-fuel-project.vercel.app/<br>
 📦 **Frontend Repo:** https://github.com/fabioesilveira/FAST-FUEL-PROJECT
 
 ---
