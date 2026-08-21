@@ -126,6 +126,8 @@ Railway Deployment
 ```
 > **Pull requests run validation only, while pushes to `main` can trigger the production deployment.**
 
+---
+
 ## Features
 
 ### Order System
