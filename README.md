@@ -48,7 +48,15 @@ The project follows a layered architecture based on **MVC and a Service Layer**,
 
 **Testing**
 
-- Jest (unit testing)
+- Jest
+- Supertest
+- Unit and API integration testing
+
+**CI/CD**
+
+- GitHub Actions
+- Railway CLI
+- Automated test-before-deploy workflow
 
 **Architecture**
 
@@ -79,7 +87,9 @@ E --> I[Resend API - Transactional Emails]
 
  ## Testing
 
-The project includes unit tests using **Jest** to validate backend utilities and business logic.
+The project includes automated backend tests using **Jest and Supertest** to validate API endpoints, backend utilities, and core business logic.
+
+Tests run automatically through **GitHub Actions** on pushes and pull requests before deployment.
 
 Run tests with:
 
@@ -87,6 +97,34 @@ Run tests with:
 npm test
 ```
 ---
+
+## CI/CD
+
+The backend uses **GitHub Actions** for continuous integration and deployment.
+
+On pushes and pull requests to the `main` branch, the workflow:
+
+- Installs dependencies using `npm ci`
+- Runs the automated Jest and Supertest test suite
+- Stops the pipeline if tests fail
+- Deploys the backend to Railway only after successful validation
+
+Production deployment is performed through the Railway CLI using a project-scoped deployment token stored securely as a GitHub Actions secret.
+
+```text
+Push / Pull Request
+        ↓
+GitHub Actions
+        ↓
+npm ci
+        ↓
+Jest + Supertest
+        ↓
+Tests Pass
+        ↓
+Railway Deployment
+```
+> **Pull requests run validation only, while pushes to `main` can trigger the production deployment.**
 
 ## Features
 
@@ -567,11 +605,15 @@ Messages are stored in the database and can be managed by administrators through
 
 ## Deployment
 
-The Fast Fuel backend API is deployed on **Railway**, where the Node.js server, MySQL database connection, JWT secret, Stripe secret key, Resend API key, and production tracking URL are managed through environment variables.
+The Fast Fuel backend API is deployed on **Railway**.
 
-The deployed frontend communicates with the Railway API, payment processing is handled through Stripe's sandbox environment, and transactional order confirmation emails are delivered through Resend using the verified `fast-fuel-orders.com` domain.
+Deployment is automated through **GitHub Actions**. On pushes to the `main` branch, the CI pipeline installs dependencies and runs the Jest and Supertest test suite. The backend is deployed to the Railway production service only after the validation job succeeds.
 
-This allows the application to simulate a complete production-style ordering workflow including payment processing, database persistence, transactional email notifications, and order tracking.
+Railway manages the Node.js application, MySQL database connection, JWT secret, Stripe secret key, Resend API key, frontend URL, and production tracking URL through environment variables.
+
+The deployed frontend communicates with the Railway API, payment processing is handled through Stripe's sandbox environment, and transactional emails are delivered through Resend using the verified `fast-fuel-orders.com` domain.
+
+This creates a production-style workflow that includes automated testing, controlled deployment, payment verification, database persistence, transactional email delivery, and order tracking.
 
 ---
 
@@ -674,6 +716,6 @@ You can test the API using tools such as Postman, Insomnia, or Thunder Client.
 
 ---
 
-### Backend Automated Tests – Jest (19 Tests Passing)
+### Backend Automated Tests – Jest + Supertest (19 Tests Passing)
 
 ![Automated Tests](images/Jest.png)
