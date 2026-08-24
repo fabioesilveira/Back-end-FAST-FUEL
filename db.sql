@@ -8,7 +8,7 @@ USE db_fastFuel;
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     fullName VARCHAR(255) NOT NULL,
-    phone VARCHAR(50) NOT NULL,
+    phone VARCHAR(50) NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     type ENUM('admin', 'normal') NOT NULL DEFAULT 'normal',

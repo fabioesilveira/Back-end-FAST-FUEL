@@ -47,9 +47,12 @@ async function postUserService(fullName, phone, email, password) {
 
     const hashedPassword = await bcryptjs.hash(password, 10);
 
+    const normalizedPhone =
+        String(phone || "").trim() || null;
+
     const result = await createNewUser(
         fullName,
-        phone,
+        normalizedPhone,
         e,
         hashedPassword
     );
