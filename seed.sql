@@ -130,7 +130,7 @@ VALUES (
         'Onion Rings / 400kcal',
         3.00,
         'sides',
-        'https://media.istockphoto.com/id/518802156/photo/onion-rings.jpg?s=612x612&w=0&k=20&c=SVVifA9O-1cjBgy9bI-YAhcAAI9ohTv34VmOxhFIMpU=',
+        'OnionRings.png',
         'Thick-cut onions coated in crispy batter and fried to perfection. Crunchy and crave-worthy goodness.'
     ),
     (
@@ -144,7 +144,7 @@ VALUES (
         'Cheese Sticks / 500kcal',
         3.00,
         'sides',
-        'https://thumbs.dreamstime.com/b/yummy-delicious-mozzarella-sticks-isolated-white-background-yummy-delicious-mozzarella-sticks-isolated-white-363106962.jpg',
+        'MozzarellaSticks.png',
         'Crispy on the outside, melty on the inside. Served hot with marinara dipping sauce for extra flavor punch!'
     ),
     (
