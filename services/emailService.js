@@ -197,7 +197,7 @@ const sendOrderConfirmationEmail = async ({
                 style="
                     margin: 0;
                     padding: 24px 12px;
-                    background: #fffaf5;
+                    background: #ffffff;
                     font-family: Arial, sans-serif;
                     color: #222;
                 "
@@ -222,7 +222,7 @@ const sendOrderConfirmationEmail = async ({
                         <div
                             style="
                                 color: #ffffff;
-                                font-size: 24px;
+                                font-size: 22px;
                                 font-weight: 800;
                                 letter-spacing: 0.04em;
                             "
@@ -473,7 +473,7 @@ const sendEmailVerification = async ({
                 style="
                     margin: 0;
                     padding: 24px 12px;
-                    background: #fffaf5;
+                    background: #ffffff;
                     font-family: Arial, sans-serif;
                     color: #222;
                 "
@@ -498,7 +498,7 @@ const sendEmailVerification = async ({
                         <div
                             style="
                                 color: #ffffff;
-                                font-size: 24px;
+                                font-size: 22px;
                                 font-weight: 800;
                                 letter-spacing: 0.04em;
                             "
@@ -599,7 +599,7 @@ const sendPasswordResetEmail = async ({
                 style="
                     margin: 0;
                     padding: 24px 12px;
-                    background: #fffaf5;
+                    background: #ffffff;
                     font-family: Arial, sans-serif;
                     color: #222;
                 "
@@ -624,7 +624,7 @@ const sendPasswordResetEmail = async ({
                         <div
                             style="
                                 color: #ffffff;
-                                font-size: 24px;
+                                font-size: 22px;
                                 font-weight: 800;
                                 letter-spacing: 0.04em;
                             "

@@ -130,7 +130,7 @@ VALUES (
         'Onion Rings / 400kcal',
         3.00,
         'sides',
-        'OnionRings.png',
+        'https://back-end-fast-fuel-production.up.railway.app/images/OnionRings.png',
         'Thick-cut onions coated in crispy batter and fried to perfection. Crunchy and crave-worthy goodness.'
     ),
     (
@@ -144,7 +144,7 @@ VALUES (
         'Cheese Sticks / 500kcal',
         3.00,
         'sides',
-        'MozzarellaSticks.png',
+        'https://back-end-fast-fuel-production.up.railway.app/images/MozzarellaSticks.png',
         'Crispy on the outside, melty on the inside. Served hot with marinara dipping sauce for extra flavor punch!'
     ),
     (
