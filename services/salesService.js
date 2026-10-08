@@ -11,6 +11,8 @@ const {
     markSaleCompleted,
     trackSaleByCodeAndEmail,
     findMyOrders,
+    findGuestSaleForClaim,
+    claimSaleByOrderCode,
 } = require("../models/salesModel");
 
 const {
@@ -912,6 +914,93 @@ async function confirmSaleReceivedService(
     };
 }
 
+async function claimSaleService(orderCode, user) {
+    const code = String(orderCode || "").trim();
+
+    const userId = user?.id;
+
+    const userEmail = String(
+        user?.email || ""
+    )
+        .trim()
+        .toLowerCase();
+
+    if (!code) {
+        return {
+            msg: "Order code is required",
+            status: 400,
+        };
+    }
+
+    if (!userId || !userEmail) {
+        return {
+            msg: "Unauthorized",
+            status: 401,
+        };
+    }
+
+    const rows =
+        await findGuestSaleForClaim(code);
+
+    if (!rows || rows.length === 0) {
+        return {
+            msg: "Order not found",
+            status: 404,
+        };
+    }
+
+    const sale = rows[0];
+
+    if (sale.user_id) {
+        if (
+            String(sale.user_id) ===
+            String(userId)
+        ) {
+            return {
+                msg: "Order is already linked to your account",
+                status: 409,
+            };
+        }
+
+        return {
+            msg: "Order is already linked to another account",
+            status: 403,
+        };
+    }
+
+    const orderEmail = String(
+        sale.customer_email || ""
+    )
+        .trim()
+        .toLowerCase();
+
+    if (orderEmail !== userEmail) {
+        return {
+            msg: "Order email does not match your account email",
+            status: 403,
+        };
+    }
+
+    const result =
+        await claimSaleByOrderCode(
+            code,
+            userId
+        );
+
+    if (!result.affectedRows) {
+        return {
+            msg: "Unable to add order to your account",
+            status: 409,
+        };
+    }
+
+    return {
+        ok: true,
+        msg: "Order added to your account successfully",
+        order_code: code,
+    };
+}
+
 
 module.exports = {
     quoteSalesService,
@@ -923,4 +1012,5 @@ module.exports = {
     updateSaleStatusService,
     confirmSaleReceivedService,
     calcTotalsFromDb,
+    claimSaleService,
 };
