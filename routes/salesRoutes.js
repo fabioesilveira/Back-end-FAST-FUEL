@@ -9,6 +9,7 @@ const {
   updateSaleStatusController,
   confirmSaleReceivedController,
   getMyOrdersController,
+  claimSaleController,
 } = require("../controllers/salesController");
 
 const authMiddleware = require("../middlewares/authMiddleware");
@@ -23,6 +24,7 @@ router.post("/", createSaleController);
 
 // Logged user
 router.get("/my-orders", authMiddleware, getMyOrdersController);
+router.patch("/:orderCode/claim", authMiddleware, claimSaleController);
 
 // Customer
 router.patch("/:id/confirm-received", confirmSaleReceivedController);
