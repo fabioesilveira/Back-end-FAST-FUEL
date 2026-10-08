@@ -153,29 +153,18 @@ async function claimSaleController(req, res) {
     try {
         const { orderCode } = req.params;
 
-        const data =
-            await claimSaleService(
-                orderCode,
-                req.user
-            );
+        const data = await claimSaleService(orderCode, req.user);
 
         if (data?.msg && !data?.ok) {
-            return res
-                .status(data.status || 400)
-                .json({ msg: data.msg });
+            return res.status(data.status || 400).json({ msg: data.msg });
         }
 
         return res.status(200).json(data);
     } catch (error) {
-        console.error(
-            "claimSaleController error:",
-            error
-        );
+        console.error("claimSaleController error:", error);
 
         return res.status(500).json({
-            msg:
-                error.message ||
-                "Internal server error",
+            msg: error.message || "Internal server error",
         });
     }
 }
