@@ -196,6 +196,33 @@ async function markSaleCompleted(id) {
     return result;
 }
 
+async function findGuestSaleForClaim(orderCode) {
+    const [rows] = await connection.execute(
+        `SELECT id, order_code, user_id, customer_email
+         FROM sales
+         WHERE TRIM(order_code) = ?
+         LIMIT 1`,
+        [String(orderCode).trim()]
+    );
+
+    return rows;
+}
+
+async function claimSaleByOrderCode(orderCode, userId) {
+    const [result] = await connection.execute(
+        `UPDATE sales
+         SET user_id = ?
+         WHERE TRIM(order_code) = ?
+           AND user_id IS NULL`,
+        [
+            userId,
+            String(orderCode).trim(),
+        ]
+    );
+
+    return result;
+}
+
 module.exports = {
     findProductsForTotalsByIds,
     findProductsForSnapshotByIds,
@@ -209,4 +236,6 @@ module.exports = {
     markSaleInProgress,
     markSaleSent,
     markSaleCompleted,
+    findGuestSaleForClaim,
+    claimSaleByOrderCode,
 };
