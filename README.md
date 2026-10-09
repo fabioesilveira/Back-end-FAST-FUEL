@@ -250,6 +250,23 @@ Orders can be created **without requiring authentication**, allowing users to pl
 
 ---
 
+### Guest Order Claim
+
+Authenticated users can optionally link a previous guest order to their Fast Fuel account using the order code.
+
+The backend validates that:
+
+- the request is authenticated with a valid JWT
+- the order exists
+- the order is not already linked to another account
+- the guest order email matches the authenticated account email
+
+When validation succeeds, the order is assigned to the authenticated user's `user_id` and automatically becomes available through **My Orders**. Orders can be claimed regardless of their current order status, including completed orders.
+
+This prevents guest purchases from being automatically attached to accounts based only on email while still giving customers a secure way to add past guest purchases to their order history.
+
+---
+
 ### Order Snapshot System
 
 When an order is created, the system saves a **snapshot of the product data** included in that order.
@@ -467,6 +484,9 @@ Retrieve details for a specific order (admin only).
 
 GET /sales/my-orders  
 Retrieve orders belonging to the authenticated user.
+
+PATCH /sales/:orderCode/claim
+Link a guest order to the authenticated user's account. The order email must match the email stored in the user's JWT, and the order must not already belong to another account.
 
 POST /sales  
 Create a new order. Supports both guest checkout and authenticated users.
