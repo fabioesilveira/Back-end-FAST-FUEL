@@ -13,6 +13,7 @@ const {
     getUserByIdController,
     removeOwnUserController,
     adminUpdateUserPasswordController,
+    checkUserEmailController,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -52,6 +53,9 @@ router.post(
     "/reset-password",
     resetPasswordController
 );
+
+// Check if email belongs to an existing account
+router.post("/check-email", checkUserEmailController);
 
 // Get user by id
 router.get("/:id", authMiddleware, getUserByIdController);

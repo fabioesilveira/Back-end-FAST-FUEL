@@ -363,6 +363,16 @@ async function getUserByIdService(requestedId, loggedUser) {
     return rows[0];
 }
 
+async function checkUserEmailService(email) {
+    const e = String(email || "").trim().toLowerCase();
+
+    const rows = await findUserByEmail(e);
+
+    return {
+        exists: rows.length > 0,
+    };
+}
+
 module.exports = {
     postUserService,
     verifyUserEmailService,
@@ -377,4 +387,5 @@ module.exports = {
     removeOwnUserService,
     adminUpdateUserPasswordService,
     getUserByIdService,
+    checkUserEmailService,
 };

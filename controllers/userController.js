@@ -12,6 +12,7 @@ const {
     getUserByIdService,
     removeOwnUserService,
     adminUpdateUserPasswordService,
+    checkUserEmailService,
 } = require("../services/userService");
 
 async function postUserController(req, res) {
@@ -281,6 +282,30 @@ async function getUserByIdController(req, res) {
     }
 }
 
+async function checkUserEmailController(req, res) {
+    try {
+        let { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                msg: "Email is required",
+            });
+        }
+
+        email = normalizeEmail(email);
+
+        const data = await checkUserEmailService(email);
+
+        return res.status(200).json(data);
+    } catch (error) {
+        console.error("CHECK EMAIL ERROR:", error);
+
+        return res.status(500).json({
+            msg: "Failed to check email",
+        });
+    }
+}
+
 module.exports = {
     postUserController,
     verifyUserEmailController,
@@ -295,4 +320,5 @@ module.exports = {
     removeOwnUserController,
     adminUpdateUserPasswordController,
     getUserByIdController,
+    checkUserEmailController,
 };
